@@ -2079,7 +2079,11 @@ function quizContentHtml(quiz, key){
 
 function scrollToQuizQ(qi){
   quizState.current = qi;
-  renderActiveQuiz(); // vẽ lại để ô số đang xem nổi viền
+  // Đổi viền tại chỗ, KHÔNG vẽ lại cả khung -> chuyển động cuộn mượt liền mạch
+  document.querySelectorAll('.quiz-nav').forEach(nav => {
+    nav.querySelectorAll('.quiz-nav-dot').forEach((d, i) => d.classList.toggle('cur', i === qi));
+  });
+  syncQuizNavScroll();
   const el = document.getElementById(`quizq-${quizSection}-${qi}`);
   if(!el) return;
   // Khung cha (overflow hidden) nếu lỡ bị trôi thì kéo về 0 — chống màn hình trắng xoá
