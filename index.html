@@ -347,6 +347,8 @@
   .quiz-nav-dot:hover{border-color:var(--ink);color:var(--ink);}
   .quiz-nav-dot.done{background:var(--ink);border-color:var(--ink);color:#fff;}
   html[data-theme="dark"] .quiz-nav-dot.done{color:#0F1420;}
+  .quiz-nav-dot.cur{outline:2.5px solid var(--ink);outline-offset:2px;}
+  html[data-theme="dark"] .quiz-nav-dot.cur{outline-color:var(--ink);}
   .quiz-nav-dot.ok{background:var(--teal-tint);border-color:var(--teal);color:var(--teal-deep);}
   .quiz-nav-dot.no{background:var(--coral-tint);border-color:var(--coral);color:var(--coral-deep);}
   .practice-quiz-foot .quiz-submit-btn{margin-top:0;}
@@ -1042,10 +1044,38 @@ function realItemsInGrade(section){
   return itemsInGrade(section).filter(x => x.type !== 'folder');
 }
 
+/* ============ NHỚ VỊ TRÍ ĐANG HỌC — load lại vẫn ở đúng thẻ, đúng bài ============ */
+const NAV_STATE_KEY = 'trongtam_nav_v1';
+function saveNavState(viewId){
+  try{
+    const active = viewId || (document.querySelector('.view.active') || {}).id || 'view-home';
+    localStorage.setItem(NAV_STATE_KEY, JSON.stringify({
+      grade: currentGrade, view: active, exTab: currentExTab, sel: selectedItemKey
+    }));
+  }catch(e){}
+}
+let navRestored = false;
+function restoreNavState(){
+  if(navRestored) return;
+  navRestored = true;
+  let st = null;
+  try{ st = JSON.parse(localStorage.getItem(NAV_STATE_KEY)); }catch(e){}
+  if(!st || !st.grade || !st.view || st.view === 'view-home') return;
+  try{
+    selectedItemKey = Object.assign(selectedItemKey, st.sel || {});
+    goToGrade(st.grade);
+    if(st.view === 'view-grade') return;
+    if(st.view === 'view-exhub'){ openExHub(); return; }
+    if(st.view === 'view-exercises'){ openExPart(st.exTab || 'exam'); return; }
+    if(st.view === 'view-theory' || st.view === 'view-solutions'){ goTo(st.view.replace('view-', '')); }
+  }catch(e){ console.error('Lỗi khôi phục vị trí học:', e); }
+}
+
 function goHome(){
   currentGrade = null;
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
   document.getElementById('view-home').classList.add('active');
+  saveNavState('view-home');
 }
 const GRADE_TITLES = { '10':'Vật Lý 10', '11':'Vật Lý 11', '12':'Vật Lý 12', 'dh':'Ôn thi Đại học' };
 const GRADE_LABELS = { '10':'Lớp 10', '11':'Lớp 11', '12':'Lớp 12', 'dh':'Ôn thi ĐH' };
@@ -1074,6 +1104,7 @@ function goToGrade(g){
   currentGrade = g;
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
   document.getElementById('view-grade').classList.add('active');
+  saveNavState('view-grade');
   document.getElementById('gradeTitle').textContent = GRADE_TITLES[g] || ('Vật Lý ' + g);
   ['theory','exercises','solutions'].forEach(sec=>{
     const meta = sectionMeta(sec);
@@ -1087,12 +1118,14 @@ function goToGrade(g){
 function goBackToGrade(){
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
   document.getElementById('view-grade').classList.add('active');
+  saveNavState('view-grade');
 }
 const EX_PART_TITLES = { exam:'Làm đề', quizTheory:'Trắc nghiệm định tính', quizMath:'Trắc nghiệm định lượng' };
 
 function openExHub(){
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
   document.getElementById('view-exhub').classList.add('active');
+  saveNavState('view-exhub');
   const t = document.getElementById('exhubTitle');
   if(t) t.textContent = sectionMeta('exercises').title + (currentGrade && currentGrade !== 'dh' ? ' ' + currentGrade : '');
 }
@@ -1105,6 +1138,7 @@ function openExPart(part){
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
   document.getElementById('view-exercises').classList.add('active');
   switchExTab(part);
+  saveNavState('view-exercises');
   const t = document.getElementById('exPartTitle');
   if(t) t.textContent = (currentGrade === 'dh' && part === 'exam') ? sectionMeta('exercises').title : EX_PART_TITLES[part]; // dh: "Đề thực chiến"
 }
@@ -1117,6 +1151,7 @@ function goTo(section){
   }
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
   document.getElementById('view-'+section).classList.add('active');
+  saveNavState('view-' + section);
   const meta = sectionMeta(section);
   const titleEl = document.querySelector('#view-'+section+' .subview-title');
   const descEl = document.querySelector('#view-'+section+' .subview-desc');
@@ -1302,6 +1337,7 @@ function renderReaderList(section){
 
 function selectReaderItem(section, key){
   selectedItemKey[section] = key;
+  saveNavState();
   logHistory({ type: 'open', itemId: key, title: itemTitleByKey(section, key), where: sectionLabelNow(section) });
   renderReaderList(section);
   renderReaderViewer(section);
@@ -1951,6 +1987,7 @@ function quizContentHtml(quiz, key){
   const navHtml = `<div class="quiz-nav">` + qList.map((qq, qi)=>{
     let cls = quizState.answers[qi] !== undefined ? ' done' : '';
     if(quizState.submitted) cls = quizState.answers[qi] === (qq.correct || 0) ? ' ok' : ' no';
+    if(quizState.current === qi) cls += ' cur'; // ô vừa bấm -> viền nổi bật
     return `<button class="quiz-nav-dot${cls}" onclick="scrollToQuizQ(${qi})" title="Câu ${qi + 1}${cls === ' done' ? ' — đã chọn' : (cls === '' ? ' — chưa làm' : '')}">${qi + 1}</button>`;
   }).join('') + `</div>`;
 
@@ -1959,6 +1996,8 @@ function quizContentHtml(quiz, key){
 }
 
 function scrollToQuizQ(qi){
+  quizState.current = qi;
+  renderActiveQuiz(); // vẽ lại để ô số đang xem nổi viền
   const el = document.getElementById(`quizq-${quizSection}-${qi}`);
   if(el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
@@ -2640,6 +2679,7 @@ if(!isConfigured()){
       quizMath: parsed.quizMath || []
     };
     renderAll();
+    restoreNavState(); // load lại trang -> quay về đúng thẻ, đúng bài đang học
   }, (err)=>{
     console.error('Lỗi kết nối Firestore:', err);
     showSetupNotice('Không tải được dữ liệu', 'Kiểm tra lại Firestore Rules (phải cho phép "allow read: if true;") và đúng firebaseConfig.');
