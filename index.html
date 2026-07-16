@@ -2063,7 +2063,7 @@ function quizContentHtml(quiz, key){
       ${passed ? '' : `<button class="quiz-submit-btn" onclick="retryQuiz()">Làm lại</button>`}`;
   } else {
     const answered = Object.keys(quizState.answers).length;
-    footHtml = `<button class="quiz-submit-btn" onclick="confirmSubmitQuiz()">Nộp bài (đã chọn ${answered}/${qList.length})</button>`;
+    footHtml = `<button class="quiz-submit-btn" onclick="confirmSubmitQuiz()">Nộp bài</button>`;
   }
 
   const navHtml = `<div class="quiz-nav">` + qList.map((qq, qi)=>{
@@ -2774,6 +2774,19 @@ function authErrorVi(err){
 
 function doStudentLogout(){
   firebase.auth().signOut();
+  // Đóng mọi bài đang làm dở rồi đưa về trang chủ
+  if(examState){
+    if(examState.timerId) clearInterval(examState.timerId);
+    examState = null;
+    const eo = document.getElementById('examOverlay');
+    if(eo) eo.classList.remove('open');
+    const sb = document.getElementById('examSubmitBtn');
+    if(sb) sb.style.display = '';
+  }
+  closeQuizModal();
+  practiceActive.quizTheory = false;
+  practiceActive.quizMath = false;
+  goHome();
 }
 
 /* ============ KẾT NỐI FIREBASE — LẮNG NGHE THAY ĐỔI REAL-TIME ============ */
