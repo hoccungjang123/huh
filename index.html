@@ -306,7 +306,10 @@
   .quiz-modal-head h4{font-size:15.5px;font-weight:700;font-family:'Be Vietnam Pro',sans-serif;flex:1;white-space:nowrap;}
   .quiz-close{width:28px;height:28px;border-radius:50%;color:var(--ink-faint);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
   .quiz-close:hover{background:var(--paper);color:var(--ink);}
-  .quiz-modal-body{padding:18px 20px;overflow-y:auto;}
+  .quiz-modal-body{padding:18px 20px;overflow-y:auto;flex:1;min-height:0;}
+  .quiz-modal-foot{flex-shrink:0;padding:10px 20px 14px;border-top:1px solid var(--paper-line);background:var(--white);}
+  .quiz-modal-foot .quiz-submit-btn{margin-top:0;}
+  .quiz-modal-foot .quiz-result{margin-top:0;margin-bottom:8px;}
   .quiz-req{font-size:12px;font-weight:700;color:var(--amber-deep);background:var(--amber-tint);padding:5px 11px;border-radius:999px;}
   .quiz-q{margin-bottom:16px;}
   .quiz-q-text{font-size:14px;font-weight:700;margin-bottom:8px;line-height:1.5;}
@@ -889,6 +892,7 @@
       <button class="quiz-close" onclick="closeQuizModal()">✕</button>
     </div>
     <div class="quiz-modal-body" id="quizModalBody"></div>
+    <div class="quiz-modal-foot" id="quizModalFoot"></div>
   </div>
 </div>
 
@@ -2075,13 +2079,16 @@ function scrollToQuizQ(qi){
   renderActiveQuiz(); // vẽ lại để ô số đang xem nổi viền
   const el = document.getElementById(`quizq-${quizSection}-${qi}`);
   if(!el) return;
+  // Khung cha (overflow hidden) nếu lỡ bị trôi thì kéo về 0 — chống màn hình trắng xoá
+  const hiddenBody = el.closest('.reader-viewer-body');
+  if(hiddenBody) hiddenBody.scrollTop = 0;
+  const flexWrap = el.closest('.practice-quiz-flex');
+  if(flexWrap) flexWrap.scrollTop = 0;
   const wrap = el.closest('.practice-quiz-scroll') || el.closest('.quiz-modal-body');
   if(wrap){
-    // chỉ cuộn bên trong khung câu hỏi — không đụng tới cuộn của cả trang (hết cảnh trắng xoá)
+    // CHỈ cuộn bên trong khung câu hỏi — tuyệt đối không đụng các khung ngoài
     const top = el.getBoundingClientRect().top - wrap.getBoundingClientRect().top + wrap.scrollTop - 12;
     wrap.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
-  } else {
-    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
   }
 }
 
@@ -2095,8 +2102,10 @@ function renderQuizPanel(){
   const c = quizContentHtml(quiz, key);
   const reqEl = document.getElementById('quizReq');
   if(reqEl) reqEl.textContent = c.reqText;
+  const foot = document.getElementById('quizModalFoot');
   const keep = body.scrollTop;
-  body.innerHTML = c.html;
+  body.innerHTML = c.qsHtml;
+  if(foot) foot.innerHTML = c.navHtml + c.footHtml; // bảng số + nút nộp ghim cố định ở đáy
   body.scrollTop = keep; // vẽ lại nhưng không nhảy vị trí
 }
 
@@ -2219,7 +2228,7 @@ function renderPracticeViewer(section){
 
   let pillHtml;
   if(qInfo && !done){
-    pillHtml = `<button class="check-pill locked" onclick="startPractice('${section}')" title="Làm đạt để được tính hoàn thành">🔒 Làm đạt để hoàn thành</button>`;
+    pillHtml = ''; // chưa hoàn thành thì không hiện gì — nút "Bắt đầu luyện tập" giữa khung là đủ
   } else {
     pillHtml = checkPillHtml(key, 'Đã hoàn thành', 'Đánh dấu hoàn thành');
     if(qInfo) pillHtml += `<button class="check-pill" onclick="startPractice('${section}')" title="Luyện lại bộ câu ngẫu nhiên mới">📝 Làm lại</button>`;
