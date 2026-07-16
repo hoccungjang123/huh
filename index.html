@@ -681,6 +681,58 @@
   .check-pill:hover{border-color:var(--ink);color:var(--ink);}
   .check-pill.done{background:var(--teal-tint);border-color:var(--teal);color:var(--teal-deep);}
   .vcard-body .check-pill{margin-top:10px;}
+
+  /* ===================== TỐI ƯU HIỂN THỊ ĐIỆN THOẠI ===================== */
+  @media (max-width:860px){
+    .wrap{padding:8px 14px 44px;}
+    /* iOS không hỗ trợ nền bám cố định -> băng ghim dùng nền trơn cho khỏi lệch lưới */
+    .account-bar, .page-head{background-image:none;}
+    .subview-title{font-size:21px;}
+    .back-link{font-size:12.5px;margin-bottom:4px;}
+    .hub-card{min-height:0;padding:20px 18px;}
+    .hub-card h3{font-size:17px;}
+    .reader-viewer{height:72vh;}
+    .reader-viewer{height:72dvh;}
+    .reader-viewer.practice-mode{height:calc(100vh - 165px);}
+    .reader-viewer.practice-mode{height:calc(100dvh - 165px);}
+    .reader-viewer-head{padding:12px 14px;gap:10px;}
+    .reader-viewer-head h4{font-size:14px;}
+    .comments-panel{padding:16px 14px;}
+    .comment-item.is-reply{margin-left:22px;}
+    .comment-item.is-reply .comment-avatar{width:24px;height:24px;}
+    .comment-reply-form{margin-left:22px;}
+    .practice-quiz-scroll{padding:14px 14px 8px;}
+    .practice-quiz-foot{padding:8px 12px 12px;}
+    .quiz-nav-dot{width:32px;height:32px;font-size:12px;}
+    .quiz-nav{max-height:82px;}
+    .quiz-modal{max-height:92vh;}
+    .quiz-modal{max-height:92dvh;}
+    .exam-bubble{width:34px;height:34px;font-size:13px;}
+    .exam-top{padding:10px 12px;gap:8px;}
+    .exam-top h4{font-size:13px;min-width:100px;}
+    .exam-timer{font-size:15px;padding:5px 10px;}
+    .exam-submit{padding:8px 14px;font-size:12.5px;}
+    .exam-body{grid-template-rows:52% 48%;}
+    .exam-pdf{padding:10px;}
+    .exam-sheet{padding:12px;}
+    .exam-intro{padding:16px;}
+    .exam-intro h3{font-size:18px;}
+    .pdf-pages-wrap{padding:10px;}
+    .nav-menu{min-width:210px;}
+    .prog-label{width:92px;font-size:12px;}
+  }
+  @media (max-width:600px){
+    .subview-title{font-size:19px;}
+    #view-home{padding-top:62px;}
+    #view-grade, #view-exhub, #view-theory, #view-exercises, #view-solutions{padding-top:126px;}
+    .account-name{max-width:110px;}
+    .reader-list{max-height:200px;}
+    .theme-toggle{width:32px;height:32px;font-size:14px;}
+    .account-login-btn{padding:7px 13px;font-size:12px;}
+    .quiz-modal-body{padding:14px;}
+    .quiz-modal-foot{padding:8px 14px 12px;}
+    .auth-box{padding:22px 18px;}
+  }
 </style>
 <script>try{if(localStorage.getItem('trongtam_theme')==='dark')document.documentElement.dataset.theme='dark';}catch(e){}</script>
 </head>
