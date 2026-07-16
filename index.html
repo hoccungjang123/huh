@@ -343,7 +343,7 @@
     background:var(--white);
   }
   .quiz-nav{
-    display:flex;flex-wrap:wrap;gap:5px;margin-bottom:9px;
+    display:flex;flex-wrap:wrap;gap:5px;margin-bottom:9px;position:relative;
     max-height:72px;overflow-y:auto;padding-right:2px;scrollbar-width:thin;
   }
   .quiz-nav-dot{
@@ -354,7 +354,7 @@
   .quiz-nav-dot:hover{border-color:var(--ink);color:var(--ink);}
   .quiz-nav-dot.done{background:var(--ink);border-color:var(--ink);color:#fff;}
   html[data-theme="dark"] .quiz-nav-dot.done{color:#0F1420;}
-  .quiz-nav-dot.cur{outline:1.5px solid var(--coral);outline-offset:1px;box-shadow:0 0 5px rgba(209,87,60,.35);}
+  .quiz-nav-dot.cur{border-color:var(--coral) !important;box-shadow:0 0 0 1.5px var(--coral);}
   .quiz-nav-dot.ok{background:var(--teal-tint);border-color:var(--teal);color:var(--teal-deep);}
   .quiz-nav-dot.no{background:var(--coral-tint);border-color:var(--coral);color:var(--coral-deep);}
   .practice-quiz-foot .quiz-submit-btn{margin-top:0;}
@@ -2130,7 +2130,10 @@ function renderActiveQuiz(){
 function syncQuizNavScroll(){
   document.querySelectorAll('.quiz-nav').forEach(nav => {
     const cur = nav.querySelector('.quiz-nav-dot.cur');
-    if(cur) nav.scrollTop = Math.max(0, cur.offsetTop - nav.clientHeight / 2 + 14);
+    if(!cur) return;
+    const above = cur.offsetTop < nav.scrollTop;
+    const below = cur.offsetTop + cur.offsetHeight > nav.scrollTop + nav.clientHeight;
+    if(above || below) nav.scrollTop = Math.max(0, cur.offsetTop - nav.clientHeight / 2 + 14); // chỉ cuộn khi ô khuất tầm nhìn
   });
 }
 
