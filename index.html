@@ -310,6 +310,7 @@
   .quiz-req{font-size:12px;font-weight:700;color:var(--amber-deep);background:var(--amber-tint);padding:5px 11px;border-radius:999px;}
   .quiz-q{margin-bottom:16px;}
   .quiz-q-text{font-size:14px;font-weight:700;margin-bottom:8px;line-height:1.5;}
+  .quiz-q-img{max-width:100%;max-height:300px;border-radius:10px;border:1px solid var(--paper-line);margin:2px 0 10px;display:block;background:#fff;}
   .quiz-opt{
     display:flex;align-items:flex-start;gap:9px;padding:9px 12px;border:1.5px solid var(--paper-line);
     border-radius:9px;margin-bottom:6px;cursor:pointer;font-size:13.5px;line-height:1.5;transition:.12s;
@@ -2027,6 +2028,7 @@ function quizContentHtml(quiz, key){
     const chosen = quizState.answers[qi];
     return `<div class="quiz-q" id="quizq-${quizSection}-${qi}">
       <div class="quiz-q-text">Câu ${qi + 1}. ${escapeHtml(qq.q)}</div>
+      ${qq.img ? `<img class="quiz-q-img" src="${escAttr(qq.img)}" alt="Hình minh hoạ" loading="lazy">` : ''}
       ${qq.options.map((op, oi) => {
         if(!(op || '').trim()) return '';
         let cls = '';
@@ -2072,7 +2074,15 @@ function scrollToQuizQ(qi){
   quizState.current = qi;
   renderActiveQuiz(); // vẽ lại để ô số đang xem nổi viền
   const el = document.getElementById(`quizq-${quizSection}-${qi}`);
-  if(el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  if(!el) return;
+  const wrap = el.closest('.practice-quiz-scroll') || el.closest('.quiz-modal-body');
+  if(wrap){
+    // chỉ cuộn bên trong khung câu hỏi — không đụng tới cuộn của cả trang (hết cảnh trắng xoá)
+    const top = el.getBoundingClientRect().top - wrap.getBoundingClientRect().top + wrap.scrollTop - 12;
+    wrap.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
+  } else {
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
 }
 
 function renderQuizPanel(){
