@@ -2063,7 +2063,7 @@ function quizContentHtml(quiz, key){
       ${passed ? '' : `<button class="quiz-submit-btn" onclick="retryQuiz()">Làm lại</button>`}`;
   } else {
     const answered = Object.keys(quizState.answers).length;
-    footHtml = `<button class="quiz-submit-btn" onclick="submitQuiz()" ${answered < qList.length ? 'disabled' : ''}>Nộp bài (đã chọn ${answered}/${qList.length})</button>`;
+    footHtml = `<button class="quiz-submit-btn" onclick="confirmSubmitQuiz()">Nộp bài (đã chọn ${answered}/${qList.length})</button>`;
   }
 
   const navHtml = `<div class="quiz-nav">` + qList.map((qq, qi)=>{
@@ -2146,6 +2146,13 @@ function retryQuiz(){
   quizState = { key: quizState.key, answers: {}, submitted: false, picked: quiz ? pickQuizIndices(quiz) : [] }; // làm lại = bộ câu ngẫu nhiên mới
   renderActiveQuiz();
 }
+function confirmSubmitQuiz(){
+  const total = (quizState.picked || []).length;
+  const answered = Object.keys(quizState.answers).length;
+  if(answered < total && !confirm(`Còn ${total - answered} câu chưa chọn đáp án — câu bỏ trống sẽ tính là sai. Nộp bài luôn?`)) return;
+  submitQuiz();
+}
+
 function submitQuiz(){
   quizState.submitted = true;
   const quiz = currentTheoryQuiz();
@@ -2312,7 +2319,7 @@ function examMaxScore(exam){
   // Chỉ tính điểm tối đa trên các câu ĐÃ có đáp án
   const mc = exam.mc.filter(k => k).length * 0.25;
   let tf = 0;
-  exam.tf.forEach(g => { const f = g.filter(k => k).length; tf += f === 4 ? 1 : f * 0.25; });
+  exam.tf.forEach(g => { const f = g.filter(k => k).length; tf += f === 4 ? 1 : 0; }); // câu Đ/S thiếu đáp án không tính vào thang điểm
   const sh = exam.short.filter(k => k && String(k).trim()).length * 0.25;
   return +(mc + tf + sh).toFixed(2);
 }
@@ -2478,7 +2485,7 @@ function submitExam(auto){
     const filled = g.filter(k => k).length;
     let ok = 0;
     g.forEach((k, j)=>{ if(k && s.answers.tf[i][j] === k) ok++; });
-    tfScore += filled === 4 ? (TF_POINTS[ok] || 0) : ok * 0.25; // câu thiếu đáp án: mỗi ý đúng 0,25đ
+    tfScore += filled === 4 ? (TF_POINTS[ok] || 0) : 0; // câu nhập thiếu đáp án -> coi như không chấm (0đ)
   });
   let shortOk = 0;
   s.exam.short.forEach((k, i)=>{
@@ -2517,14 +2524,15 @@ function renderExamResult(){
     }).join('') + '</div>';
   }
   if(s.exam.tf.length){
-    html += `<div class="exam-part"><h5>ĐÁP ÁN PHẦN II</h5>` + s.exam.tf.map((g, i)=>
-      g.map((k, j)=>{
+    html += `<div class="exam-part"><h5>ĐÁP ÁN PHẦN II</h5>` + s.exam.tf.map((g, i)=>{
+      if(g.filter(k => k).length < 4) return ''; // câu thiếu đáp án -> không chấm, không hiện
+      return g.map((k, j)=>{
         if(!k) return '';
         const mine = s.answers.tf[i][j];
         const ok = mine === k;
         return `<div class="exam-ans-row ${ok ? 'ok' : 'no'}">Câu ${i + 1}${String.fromCharCode(97 + j)}) <strong>${k}</strong>${mine ? ` — bạn chọn ${mine} ${ok ? '✓' : '✗'}` : ' — bỏ trống'}</div>`;
-      }).join('')
-    ).join('') + '</div>';
+      }).join('');
+    }).join('') + '</div>';
   }
   if(s.exam.short.length){
     html += `<div class="exam-part"><h5>ĐÁP ÁN PHẦN III</h5>` + s.exam.short.map((k, i)=>{
