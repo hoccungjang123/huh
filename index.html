@@ -685,8 +685,7 @@
   /* ===================== TỐI ƯU HIỂN THỊ ĐIỆN THOẠI ===================== */
   @media (max-width:860px){
     .wrap{padding:8px 14px 44px;}
-    /* iOS không hỗ trợ nền bám cố định -> băng ghim dùng nền trơn cho khỏi lệch lưới */
-    .account-bar, .page-head{background-image:none;}
+    .account-bar, .page-head{background-image:none;} /* iOS không hỗ trợ nền bám cố định */
     .subview-title{font-size:21px;}
     .back-link{font-size:12.5px;margin-bottom:4px;}
     .hub-card{min-height:0;padding:20px 18px;}
@@ -695,8 +694,14 @@
     .reader-viewer{height:72dvh;}
     .reader-viewer.practice-mode{height:calc(100vh - 165px);}
     .reader-viewer.practice-mode{height:calc(100dvh - 165px);}
-    .reader-viewer-head{padding:12px 14px;gap:10px;}
+    .reader-viewer-head{padding:12px 14px;gap:8px;flex-wrap:wrap;}
     .reader-viewer-head h4{font-size:14px;}
+    .reader-viewer-head-actions{flex-wrap:wrap;flex-shrink:1;min-width:0;gap:6px;justify-content:flex-end;}
+    .check-pill{font-size:11px;padding:6px 10px;}
+    .reader-newtab-link{font-size:11px;padding:6px 10px;white-space:nowrap;}
+    .zoom-controls{padding:3px;}
+    .zoom-controls button{width:22px;height:22px;font-size:13px;}
+    .zoom-input{width:22px;}
     .comments-panel{padding:16px 14px;}
     .comment-item.is-reply{margin-left:22px;}
     .comment-item.is-reply .comment-avatar{width:24px;height:24px;}
@@ -2380,12 +2385,13 @@ function examMaxScore(exam){
   return +(mc + tf + sh).toFixed(2);
 }
 
-/* Kết quả làm đề gần nhất: lưu trên máy + đối chiếu lịch sử tài khoản (đồng bộ máy khác) */
+/* Điểm cao nhất của từng đề: lưu trên máy + đối chiếu lịch sử tài khoản */
 const EXAM_RESULTS_KEY = 'trongtam_exam_results';
 function saveExamResult(itemId, res){
   try{
     const m = JSON.parse(localStorage.getItem(EXAM_RESULTS_KEY)) || {};
-    m[itemId] = { score: res.total, max: res.max, t: Date.now() };
+    const cur = m[itemId];
+    if(!cur || res.total > cur.score) m[itemId] = { score: res.total, max: res.max, t: Date.now() }; // chỉ giữ điểm cao nhất
     localStorage.setItem(EXAM_RESULTS_KEY, JSON.stringify(m));
   }catch(e){}
 }
@@ -2393,11 +2399,12 @@ function lastExamResult(itemId){
   let local = null;
   try{ local = (JSON.parse(localStorage.getItem(EXAM_RESULTS_KEY)) || {})[itemId] || null; }catch(e){}
   let fromHist = null;
-  for(let i = userHistory.length - 1; i >= 0; i--){
-    const h = userHistory[i];
-    if(h.type === 'exam' && h.itemId === itemId){ fromHist = { score: h.score, max: h.total, t: h.t }; break; }
-  }
-  if(local && fromHist) return local.t >= fromHist.t ? local : fromHist;
+  userHistory.forEach(h => {
+    if(h.type === 'exam' && h.itemId === itemId && (!fromHist || h.score > fromHist.score)){
+      fromHist = { score: h.score, max: h.total, t: h.t };
+    }
+  });
+  if(local && fromHist) return local.score >= fromHist.score ? local : fromHist;
   return local || fromHist;
 }
 
@@ -2412,8 +2419,7 @@ function examIntroHtml(item, info){
     <h3>Phòng thi online</h3>
     <p>${parts.join(' · ')} — thang điểm <strong>${info.max}</strong></p>
     <p>Thời gian làm bài: <strong>${info.duration} phút</strong>. Hết giờ hệ thống tự nộp bài.</p>
-    <p class="exam-note">Đề chỉ hiển thị bên trong phòng thi, không mở tab khác và không tải về được. Chuẩn bị giấy nháp trước khi vào!</p>
-    ${last ? `<div class="exam-last">Lần làm gần nhất: ${last.score}/${last.max} điểm · ${histTimeAgo(last.t)}</div>` : ''}
+    ${last ? `<div class="exam-last">Điểm cao nhất: ${last.score}/${last.max}</div>` : ''}
     ${item.file
       ? `<button class="exam-enter-btn" onclick="startExam()">${last ? 'Làm lại đề →' : 'Vào phòng thi →'}</button>`
       : `<p class="exam-note">⚠️ Đề chưa gắn file PDF — chưa thể vào thi.</p>`}
@@ -2637,7 +2643,7 @@ function exitExam(){
   examState = null;
   document.getElementById('examOverlay').classList.remove('open');
   document.getElementById('examSubmitBtn').style.display = '';
-  renderExercises(); // cập nhật khung chính để hiện kết quả gần nhất
+  renderExercises(); // cập nhật khung chính để hiện điểm cao nhất
 }
 
 /* ============ GIAO DIỆN SÁNG / TỐI ============ */
