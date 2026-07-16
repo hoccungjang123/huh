@@ -347,7 +347,7 @@
   .quiz-nav-dot:hover{border-color:var(--ink);color:var(--ink);}
   .quiz-nav-dot.done{background:var(--ink);border-color:var(--ink);color:#fff;}
   html[data-theme="dark"] .quiz-nav-dot.done{color:#0F1420;}
-  .quiz-nav-dot.cur{outline:2.5px solid var(--coral);outline-offset:2px;box-shadow:0 0 8px rgba(209,87,60,.45);}
+  .quiz-nav-dot.cur{outline:1.5px solid var(--coral);outline-offset:1px;box-shadow:0 0 5px rgba(209,87,60,.35);}
   .quiz-nav-dot.ok{background:var(--teal-tint);border-color:var(--teal);color:var(--teal-deep);}
   .quiz-nav-dot.no{background:var(--coral-tint);border-color:var(--coral);color:var(--coral-deep);}
   .practice-quiz-foot .quiz-submit-btn{margin-top:0;}
@@ -688,10 +688,11 @@
       <button class="account-login-btn" id="accountLoginBtn" onclick="openAuthModal()">Đăng nhập</button>
       <div class="nav-menu" id="navMenu">
         <div class="nav-menu-user" id="navMenuEmail"></div>
-        <button onclick="closeNavMenu();openProgressModal()">📊 Tiến trình học tập</button>
-        <button onclick="closeNavMenu();openHistoryModal()">📜 Lịch sử hoạt động</button>
+        <button onclick="closeNavMenu();openProgressModal()">Tiến trình học tập</button>
+        <button onclick="closeNavMenu();openHistoryModal()">Lịch sử hoạt động</button>
+        <button onclick="closeNavMenu();openPwModal()">Đổi mật khẩu</button>
         <div class="nav-menu-divider"></div>
-        <button class="nav-menu-danger" onclick="closeNavMenu();doStudentLogout()">🚪 Đăng xuất</button>
+        <button class="nav-menu-danger" onclick="closeNavMenu();doStudentLogout()">Đăng xuất</button>
       </div>
     </div>
   </div>
@@ -898,6 +899,26 @@
       <button class="quiz-close" onclick="closeProgressModal()">✕</button>
     </div>
     <div class="quiz-modal-body" id="progressModalBody"></div>
+  </div>
+</div>
+
+<!-- ============ POPUP ĐỔI MẬT KHẨU ============ -->
+<div class="quiz-overlay" id="pwOverlay" onclick="if(event.target===this)closePwModal()">
+  <div class="quiz-modal" style="max-width:380px;">
+    <div class="quiz-modal-head">
+      <h4>🔑 Đổi mật khẩu</h4>
+      <button class="quiz-close" onclick="closePwModal()">✕</button>
+    </div>
+    <div class="quiz-modal-body">
+      <div class="auth-error" id="pwMsg"></div>
+      <div id="pwForm">
+        <div class="auth-field"><label>Mật khẩu hiện tại</label><input type="password" id="pwCurrent"></div>
+        <div class="auth-field"><label>Mật khẩu mới</label><input type="password" id="pwNew"></div>
+        <div class="auth-field"><label>Nhập lại mật khẩu mới</label><input type="password" id="pwNew2"
+          onkeydown="if(event.key==='Enter')submitChangePassword()"></div>
+        <button class="auth-submit" id="pwSubmit" onclick="submitChangePassword()">Đổi mật khẩu</button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -1869,6 +1890,58 @@ function closeProgressModal(){
   if(o) o.classList.remove('open');
 }
 
+/* ============ ĐỔI MẬT KHẨU ============ */
+function showPwMsg(msg, ok){
+  const el = document.getElementById('pwMsg');
+  if(!el) return;
+  el.classList.toggle('ok', !!ok);
+  el.textContent = msg;
+  el.style.display = msg ? 'block' : 'none';
+}
+function openPwModal(){
+  const u = firebase.auth().currentUser;
+  if(!u) return;
+  ['pwCurrent','pwNew','pwNew2'].forEach(id => { const el = document.getElementById(id); if(el) el.value = ''; });
+  const isPw = u.providerData.some(p => p.providerId === 'password');
+  const form = document.getElementById('pwForm');
+  if(form) form.style.display = isPw ? 'block' : 'none';
+  showPwMsg(isPw ? '' : 'Bạn đăng nhập bằng Google nên không có mật khẩu riêng trên web — mật khẩu do tài khoản Google quản lý.', false);
+  document.getElementById('pwOverlay').classList.add('open');
+  if(isPw) setTimeout(()=>{ const el = document.getElementById('pwCurrent'); if(el) el.focus(); }, 60);
+}
+function closePwModal(){
+  const o = document.getElementById('pwOverlay');
+  if(o) o.classList.remove('open');
+}
+async function submitChangePassword(){
+  const u = firebase.auth().currentUser;
+  if(!u) return;
+  const cur = (document.getElementById('pwCurrent').value || '');
+  const nw = (document.getElementById('pwNew').value || '');
+  const nw2 = (document.getElementById('pwNew2').value || '');
+  if(!cur){ showPwMsg('Nhập mật khẩu hiện tại.'); return; }
+  if(nw.length < 6){ showPwMsg('Mật khẩu mới cần ít nhất 6 ký tự.'); return; }
+  if(nw !== nw2){ showPwMsg('Mật khẩu mới nhập lại không khớp.'); return; }
+  const btn = document.getElementById('pwSubmit');
+  if(btn){ btn.disabled = true; btn.textContent = 'Đang đổi…'; }
+  try{
+    const cred = firebase.auth.EmailAuthProvider.credential(u.email, cur);
+    await u.reauthenticateWithCredential(cred); // xác nhận lại danh tính trước khi đổi
+    await u.updatePassword(nw);
+    showPwMsg('✅ Đã đổi mật khẩu thành công!', true);
+    ['pwCurrent','pwNew','pwNew2'].forEach(id => { const el = document.getElementById(id); if(el) el.value = ''; });
+    setTimeout(closePwModal, 1600);
+  }catch(err){
+    const c = (err && err.code) || '';
+    if(c.includes('wrong-password') || c.includes('invalid-credential')) showPwMsg('Mật khẩu hiện tại không đúng.');
+    else if(c.includes('weak-password')) showPwMsg('Mật khẩu mới quá yếu — cần ít nhất 6 ký tự.');
+    else if(c.includes('too-many-requests')) showPwMsg('Thử sai quá nhiều — chờ vài phút rồi thử lại.');
+    else showPwMsg('Đổi mật khẩu thất bại (' + c + ').');
+  }finally{
+    if(btn){ btn.disabled = false; btn.textContent = 'Đổi mật khẩu'; }
+  }
+}
+
 /* ============ QUIZ CUỐI BÀI LÝ THUYẾT ============ */
 let quizState = { key: null, answers: {}, submitted: false };
 
@@ -1974,8 +2047,9 @@ function quizContentHtml(quiz, key){
     const passed = score >= quiz.pass;
     footHtml = `
       <div class="quiz-result ${passed ? 'pass' : 'fail'}">
-        ${passed ? '🎉 Đạt! ' : 'Chưa đạt. '}Bạn đúng ${score}/${qList.length} câu (cần ≥ ${quiz.pass}).
-        ${passed ? 'Bài học được tính là hoàn thành.' : 'Xem lại bài rồi thử lại nhé!'}
+        ${passed
+          ? `🎉 Đạt! Bạn đúng ${score}/${qList.length} câu — bài học được tính là hoàn thành.`
+          : `Chưa đạt — đúng ${score}/${qList.length} câu, còn thiếu <strong>${quiz.pass - score}</strong> câu đúng nữa để qua. Thử lại nhé!`}
       </div>
       ${passed ? '' : `<button class="quiz-submit-btn" onclick="retryQuiz()">Làm lại</button>`}`;
   } else {
@@ -2011,7 +2085,9 @@ function renderQuizPanel(){
   const c = quizContentHtml(quiz, key);
   const reqEl = document.getElementById('quizReq');
   if(reqEl) reqEl.textContent = c.reqText;
+  const keep = body.scrollTop;
   body.innerHTML = c.html;
+  body.scrollTop = keep; // vẽ lại nhưng không nhảy vị trí
 }
 
 /* Vẽ lại đúng bề mặt đang hiển thị quiz: khung luyện tập hoặc popup */
@@ -2108,6 +2184,8 @@ function renderPracticeViewer(section){
     ensureQuizStateFor(quiz);
     const c = quizContentHtml(quiz, key);
     viewerEl.classList.add('practice-mode');
+    const oldScrollEl = viewerEl.querySelector('.practice-quiz-scroll');
+    const keepScroll = oldScrollEl ? oldScrollEl.scrollTop : 0;
     viewerEl.innerHTML = `
       <div class="reader-viewer-head">
         <h4 title="${escAttr(item.title || '')}">${escapeHtml(item.title) || 'Chưa đặt tiêu đề'}</h4>
@@ -2122,6 +2200,8 @@ function renderPracticeViewer(section){
           <div class="practice-quiz-foot">${c.navHtml}${c.footHtml}</div>
         </div>
       </div>`;
+    const newScrollEl = viewerEl.querySelector('.practice-quiz-scroll');
+    if(newScrollEl) newScrollEl.scrollTop = keepScroll; // vẽ lại nhưng đứng yên tại chỗ
     renderCommentsPanel(section);
     return;
   }
@@ -2667,6 +2747,7 @@ if(!isConfigured()){
 
   document.getElementById('app').style.display = 'block';
   initStudentAuth();
+  restoreNavState(); // về đúng thẻ/bài ngay lập tức — dữ liệu sẽ tự đổ vào sau
 
   docRef.onSnapshot((snap)=>{
     const parsed = snap.exists ? snap.data() : {};
@@ -2678,7 +2759,6 @@ if(!isConfigured()){
       quizMath: parsed.quizMath || []
     };
     renderAll();
-    restoreNavState(); // load lại trang -> quay về đúng thẻ, đúng bài đang học
   }, (err)=>{
     console.error('Lỗi kết nối Firestore:', err);
     showSetupNotice('Không tải được dữ liệu', 'Kiểm tra lại Firestore Rules (phải cho phép "allow read: if true;") và đúng firebaseConfig.');
