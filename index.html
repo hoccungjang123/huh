@@ -342,11 +342,14 @@
     flex-shrink:0;padding:10px 22px 14px;border-top:1px solid var(--paper-line);
     background:var(--white);
   }
-  .quiz-nav{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:9px;}
+  .quiz-nav{
+    display:flex;flex-wrap:wrap;gap:5px;margin-bottom:9px;
+    max-height:72px;overflow-y:auto;padding-right:2px;scrollbar-width:thin;
+  }
   .quiz-nav-dot{
     width:28px;height:28px;border-radius:8px;border:1.5px solid var(--paper-line);
     font-size:11.5px;font-weight:700;color:var(--ink-faint);
-    display:flex;align-items:center;justify-content:center;
+    display:flex;align-items:center;justify-content:center;flex-shrink:0;
   }
   .quiz-nav-dot:hover{border-color:var(--ink);color:var(--ink);}
   .quiz-nav-dot.done{background:var(--ink);border-color:var(--ink);color:#fff;}
@@ -2116,6 +2119,15 @@ function renderActiveQuiz(){
   } else {
     renderQuizPanel();
   }
+  syncQuizNavScroll();
+}
+
+/* Bảng số nhiều câu -> tự trượt ngang để ô đang xem luôn trong tầm mắt */
+function syncQuizNavScroll(){
+  document.querySelectorAll('.quiz-nav').forEach(nav => {
+    const cur = nav.querySelector('.quiz-nav-dot.cur');
+    if(cur) nav.scrollTop = Math.max(0, cur.offsetTop - nav.clientHeight / 2 + 14);
+  });
 }
 
 function pickQuizAnswer(qi, oi){
@@ -2209,7 +2221,6 @@ function renderPracticeViewer(section){
       <div class="reader-viewer-head">
         <h4 title="${escAttr(item.title || '')}">${escapeHtml(item.title) || 'Chưa đặt tiêu đề'}</h4>
         <div class="reader-viewer-head-actions">
-          <span class="quiz-req">${c.reqText}</span>
           <button class="check-pill" onclick="exitPractice('${section}')">✕ Thoát</button>
         </div>
       </div>
