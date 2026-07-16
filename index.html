@@ -331,7 +331,26 @@
   }
   .quiz-result.pass{background:var(--teal-tint);color:var(--teal-deep);}
   .quiz-result.fail{background:var(--coral-tint);color:var(--coral-deep);}
-  .practice-quiz-wrap{height:100%;overflow-y:auto;padding:18px 22px;background:var(--white);}
+  .reader-viewer.practice-mode{height:calc(100vh - 125px);} /* đang làm bài -> khung cao hơn */
+  .practice-quiz-flex{height:100%;display:flex;flex-direction:column;background:var(--white);}
+  .practice-quiz-scroll{flex:1;min-height:0;overflow-y:auto;padding:18px 22px 10px;}
+  .practice-quiz-foot{
+    flex-shrink:0;padding:10px 22px 14px;border-top:1px solid var(--paper-line);
+    background:var(--white);
+  }
+  .quiz-nav{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:9px;}
+  .quiz-nav-dot{
+    width:28px;height:28px;border-radius:8px;border:1.5px solid var(--paper-line);
+    font-size:11.5px;font-weight:700;color:var(--ink-faint);
+    display:flex;align-items:center;justify-content:center;
+  }
+  .quiz-nav-dot:hover{border-color:var(--ink);color:var(--ink);}
+  .quiz-nav-dot.done{background:var(--ink);border-color:var(--ink);color:#fff;}
+  html[data-theme="dark"] .quiz-nav-dot.done{color:#0F1420;}
+  .quiz-nav-dot.ok{background:var(--teal-tint);border-color:var(--teal);color:var(--teal-deep);}
+  .quiz-nav-dot.no{background:var(--coral-tint);border-color:var(--coral);color:var(--coral-deep);}
+  .practice-quiz-foot .quiz-submit-btn{margin-top:0;}
+  .practice-quiz-foot .quiz-result{margin-top:0;margin-bottom:8px;}
   .check-pill.locked{cursor:pointer;color:var(--ink-faint);}
   .check-pill.locked:hover{border-color:var(--amber);color:var(--amber-deep);}
 
@@ -551,6 +570,9 @@
   .auth-submit:disabled{opacity:.6;pointer-events:none;}
   .auth-switch{font-size:12.5px;color:var(--ink-soft);text-align:center;margin-top:14px;}
   .auth-switch a{color:var(--teal-deep);font-weight:700;cursor:pointer;}
+  .auth-forgot{font-size:12px;text-align:right;margin:-6px 0 12px;}
+  .auth-forgot a{color:var(--teal-deep);font-weight:700;cursor:pointer;}
+  .auth-error.ok{background:var(--teal-tint);color:var(--teal-deep);}
 
   /* ===== THẢO LUẬN DƯỚI MỖI BÀI ===== */
   .reader-main{display:flex;flex-direction:column;gap:18px;align-items:center;min-width:0;}
@@ -587,6 +609,10 @@
   .comment-name{font-size:13px;font-weight:700;}
   .comment-time{font-size:11px;color:var(--ink-faint);}
   .comment-text{font-size:13.5px;line-height:1.65;white-space:pre-wrap;word-break:break-word;}
+  .comment-refresh{width:26px;height:26px;border-radius:50%;color:var(--ink-faint);font-size:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .comment-refresh:hover{background:var(--paper);color:var(--ink);}
+  .comment-load-btn{width:100%;padding:11px;border-radius:10px;border:1.5px dashed var(--paper-line);font-weight:700;font-size:12.5px;color:var(--ink-soft);}
+  .comment-load-btn:hover{border-color:var(--teal);color:var(--teal-deep);}
   .comment-actions{margin-top:5px;}
   .comment-reply-btn{font-size:11.5px;font-weight:700;color:var(--ink-faint);padding:2px 0;}
   .comment-reply-btn:hover{color:var(--teal-deep);}
@@ -909,6 +935,7 @@
       <input type="password" id="authPass"
         onkeydown="if(event.key==='Enter')submitAuth()">
     </div>
+    <p class="auth-forgot" id="authForgot"><a onclick="forgotPassword()">Quên mật khẩu?</a></p>
     <button class="auth-submit" id="authSubmitBtn" onclick="submitAuth()">Đăng nhập</button>
     <p class="auth-switch" id="authSwitch">Chưa có tài khoản? <a onclick="setAuthMode('register')">Đăng ký</a></p>
   </div>
@@ -937,6 +964,32 @@ const firebaseConfig = {
 /* ================================================================ */
 
 let data = { theory: [], exercises: [], solutions: [], quizTheory: [], quizMath: [] };
+
+/* ============ NGÂN HÀNG CÂU HỎI & ĐÁP ÁN TÁCH RIÊNG — chỉ tải khi cần ============ */
+const bankCache = {}; // { [itemId]: { quiz, exam } }
+
+function decPayload(p){
+  try{
+    return JSON.parse(decodeURIComponent(escape(atob(String(p).split('').reverse().join('')))));
+  }catch(e){ return {}; }
+}
+function bankIdOf(item){ return item._id || item.id; }
+
+async function ensureBankFor(item){
+  const id = bankIdOf(item);
+  if(!id) return;
+  if(item.quiz || item.exam){ bankCache[id] = { quiz: item.quiz || null, exam: item.exam || null }; return; } // dữ liệu kiểu cũ nhúng sẵn
+  if(bankCache[id]) return;
+  try{
+    const snap = await firebase.firestore().collection('trongtam_banks').doc(id).get();
+    bankCache[id] = snap.exists ? decPayload(snap.data().p) : {};
+  }catch(e){
+    console.error('Lỗi tải ngân hàng câu hỏi:', e);
+    bankCache[id] = {};
+  }
+}
+function bankQuizOf(item){ return (item && item.quiz) || (bankCache[bankIdOf(item)] || {}).quiz || null; }
+function bankExamOf(item){ return (item && item.exam) || (bankCache[bankIdOf(item)] || {}).exam || null; }
 
 /* ============ TIẾN TRÌNH HỌC TẬP (lưu riêng trên trình duyệt này) ============ */
 const PROGRESS_KEY = 'trongtam_progress_v1';
@@ -1176,8 +1229,8 @@ function buildReaderItemRow(section, list, item){
   } else if(section === 'solutions' && item.duration){
     metaHtml += `<span>${escapeHtml(item.duration)}</span>`;
   } else if(section === 'quizTheory' || section === 'quizMath'){
-    const nq = (item.quiz && Array.isArray(item.quiz.questions)) ? item.quiz.questions.length : 0;
-    metaHtml += `<span>${nq} câu hỏi</span>`;
+    const qi = getQuizInfoFor(item);
+    metaHtml += `<span>${qi ? qi.n : 0} câu hỏi</span>`;
   }
   if(isDone(key)) metaHtml += `<span class="done-dot" title="Đã đánh dấu"></span>`;
 
@@ -1285,7 +1338,7 @@ function renderReaderViewer(section){
   const fileUrl = section === 'solutions' ? item.video : item.file;
   const [doneLabel, todoLabel] = DONE_LABELS[section];
   // Bài lý thuyết có quiz: phải làm quiz đạt mới được tính hoàn thành (không đánh dấu tay được)
-  const quizForItem = section === 'theory' ? getQuizFor(item) : null;
+  const quizForItem = section === 'theory' ? getQuizInfoFor(item) : null;
   let pillHtml;
   if(quizForItem && !isDone(key)){
     pillHtml = `<button class="check-pill locked" onclick="openQuizModal()" title="Làm quiz để được tính hoàn thành bài">🔒 Làm quiz để hoàn thành</button>`;
@@ -1296,7 +1349,7 @@ function renderReaderViewer(section){
 
   let bodyHtml;
   const containerId = `pdfRender-${section}`;
-  const examFor = section === 'exercises' ? getExamFor(item) : null;
+  const examFor = section === 'exercises' ? getExamInfoFor(item) : null;
   if(examFor){
     bodyHtml = examIntroHtml(item, examFor); // đề có đáp án -> vào phòng thi, không xem PDF trực tiếp
   } else if(!fileUrl){
@@ -1338,18 +1391,15 @@ function renderReaderViewer(section){
   if(section === 'theory') renderQuizPanel();
 }
 
-/* ============ THẢO LUẬN RIÊNG CỦA TỪNG BÀI (lưu trên Firestore, real-time) ============ */
+/* ============ THẢO LUẬN THEO TỪNG BÀI (tải khi bấm xem — tiết kiệm quota Firestore) ============ */
 const COMMENT_NAME_KEY = 'trongtam_comment_name';
 const COMMENTS_COLLECTION = 'trongtam_comments';
-let commentSubs = {}; // { [section]: { key, unsub } } — đang lắng nghe bình luận của bài nào
-let commentRowsCache = {}; // { [section]: rows } — dữ liệu bình luận mới nhất, để vẽ lại khi mở/đóng ô trả lời
-let replyingTo = {};       // { [section]: docId } — đang mở ô trả lời cho bình luận nào
+let commentRowsCache = {}; // { [itemKey]: rows } — tải 1 lần/phiên, tự cập nhật khi mình gửi
+let replyingTo = {};       // { [section]: docId }
 
 function hideCommentsPanel(section){
   const panel = document.getElementById(section + 'Comments');
-  if(panel){ panel.style.display = 'none'; panel.innerHTML = ''; }
-  const sub = commentSubs[section];
-  if(sub){ sub.unsub(); delete commentSubs[section]; }
+  if(panel){ panel.style.display = 'none'; panel.innerHTML = ''; panel.dataset.key = ''; }
 }
 
 function renderCommentsPanel(section){
@@ -1357,18 +1407,18 @@ function renderCommentsPanel(section){
   if(!panel || !isConfigured() || typeof firebase === 'undefined') return;
   const key = selectedItemKey[section];
   if(!key){ hideCommentsPanel(section); return; }
-
-  const sub = commentSubs[section];
-  if(sub && sub.key === key){ panel.style.display = 'block'; return; } // vẫn đang ở đúng bài — giữ nguyên
-
-  if(sub) sub.unsub();
+  if(panel.dataset.key === key){ panel.style.display = 'block'; return; } // đã dựng cho đúng bài này
+  panel.dataset.key = key;
   replyingTo[section] = null;
-  commentRowsCache[section] = null;
   panel.style.display = 'block';
 
   const savedName = localStorage.getItem(COMMENT_NAME_KEY) || '';
   panel.innerHTML = `
-    <div class="comments-head"><h4>💬 Thảo luận</h4><span class="comments-count" id="commentsCount-${section}">…</span></div>
+    <div class="comments-head">
+      <h4>💬 Thảo luận</h4>
+      <span class="comments-count" id="commentsCount-${section}">${commentRowsCache[key] ? commentRowsCache[key].length : '…'}</span>
+      <button class="comment-refresh" onclick="loadComments('${section}')" title="Tải bình luận mới nhất">↻</button>
+    </div>
     <div class="comment-form">
       ${currentUser ? '' : `<input type="text" id="commentName-${section}" maxlength="40" placeholder="Tên của bạn" value="${escAttr(savedName)}">`}
       <textarea id="commentText-${section}" maxlength="1500" rows="3" placeholder="Đặt câu hỏi hoặc chia sẻ cách giải của bạn về bài này..."></textarea>
@@ -1377,48 +1427,42 @@ function renderCommentsPanel(section){
         <button class="comment-send-btn" id="commentSend-${section}" onclick="submitComment('${section}')">Gửi bình luận</button>
       </div>
     </div>
-    <div class="comment-list" id="commentList-${section}"><div class="comments-loading">Đang tải bình luận…</div></div>`;
+    <div class="comment-list" id="commentList-${section}"></div>`;
 
-  const unsub = firebase.firestore().collection(COMMENTS_COLLECTION)
-    .where('itemId', '==', key)
-    .onSnapshot((snap)=>{
-      const rows = [];
-      snap.forEach(d => rows.push({ docId: d.id, ...d.data() }));
-      commentRowsCache[section] = rows;
-      const countEl = document.getElementById('commentsCount-' + section);
-      if(countEl) countEl.textContent = rows.length;
-      renderCommentList(section);
-    }, (err)=>{
-      console.error('Lỗi tải bình luận:', err);
-      const listEl = document.getElementById('commentList-' + section);
-      if(listEl) listEl.innerHTML = '<div class="comments-empty">Không tải được bình luận — kiểm tra Firestore Rules cho collection "trongtam_comments".</div>';
-    });
-
-  commentSubs[section] = { key, unsub };
+  const listEl = document.getElementById('commentList-' + section);
+  if(commentRowsCache[key]){
+    renderCommentList(section);
+  } else if(listEl){
+    listEl.innerHTML = `<button class="comment-load-btn" onclick="loadComments('${section}')">💬 Xem bình luận của bài này</button>`;
+  }
 }
 
-const AVATAR_COLORS = ['#1E8A85','#D1573C','#D98E2B','#6C5DA8'];
-function avatarColor(name){
-  let h = 0;
-  for(const ch of (name || '?')) h = (h * 31 + ch.charCodeAt(0)) % 997;
-  return AVATAR_COLORS[h % AVATAR_COLORS.length];
+async function loadComments(section){
+  const key = selectedItemKey[section];
+  if(!key) return;
+  const listEl = document.getElementById('commentList-' + section);
+  if(listEl) listEl.innerHTML = '<div class="comments-loading">Đang tải bình luận…</div>';
+  try{
+    const snap = await firebase.firestore().collection(COMMENTS_COLLECTION)
+      .where('itemId', '==', key).limit(100).get();
+    const rows = [];
+    snap.forEach(d => rows.push({ docId: d.id, ...d.data() }));
+    commentRowsCache[key] = rows;
+    const countEl = document.getElementById('commentsCount-' + section);
+    if(countEl) countEl.textContent = rows.length;
+    renderCommentList(section);
+  }catch(err){
+    console.error('Lỗi tải bình luận:', err);
+    if(listEl) listEl.innerHTML = '<div class="comments-empty">Không tải được bình luận — thử lại sau.</div>';
+  }
 }
-function timeAgo(ts){
-  if(!ts || !ts.toMillis) return 'vừa xong';
-  const sec = Math.floor((Date.now() - ts.toMillis()) / 1000);
-  if(sec < 60) return 'vừa xong';
-  if(sec < 3600) return Math.floor(sec/60) + ' phút trước';
-  if(sec < 86400) return Math.floor(sec/3600) + ' giờ trước';
-  if(sec < 2592000) return Math.floor(sec/86400) + ' ngày trước';
-  return new Date(ts.toMillis()).toLocaleDateString('vi-VN');
-}
-/* Vẽ danh sách bình luận dạng luồng: bình luận gốc mới nhất lên trên,
-   các trả lời xếp theo dòng thời gian ngay bên dưới bình luận gốc của nó. */
+
+/* Vẽ danh sách dạng luồng: bình luận gốc mới nhất lên trên, trả lời xếp theo thời gian bên dưới */
 function renderCommentList(section){
   const listEl = document.getElementById('commentList-' + section);
   if(!listEl) return;
-  const rows = commentRowsCache[section] || [];
-  // Giữ lại nội dung đang gõ dở trong ô trả lời khi danh sách được vẽ lại (VD: có bình luận mới đến)
+  const key = selectedItemKey[section];
+  const rows = commentRowsCache[key] || [];
   const draftEl = document.getElementById('replyText-' + section);
   const draft = draftEl ? draftEl.value : '';
 
@@ -1429,18 +1473,17 @@ function renderCommentList(section){
 
   const ms = c => c.createdAt?.toMillis?.() ?? Date.now();
   const parentIds = new Set(rows.filter(c => !c.replyTo).map(c => c.docId));
-  // Bình luận gốc + trả lời "mồ côi" (bình luận gốc đã bị xoá) hiện ở cấp gốc
   const parents = rows.filter(c => !c.replyTo || !parentIds.has(c.replyTo));
-  parents.sort((a,b)=> ms(b) - ms(a));
+  parents.sort((a, b) => ms(b) - ms(a));
   const byParent = {};
-  rows.forEach(c=>{
+  rows.forEach(c => {
     if(c.replyTo && parentIds.has(c.replyTo)) (byParent[c.replyTo] = byParent[c.replyTo] || []).push(c);
   });
-  Object.values(byParent).forEach(list => list.sort((a,b)=> ms(a) - ms(b)));
+  Object.values(byParent).forEach(list => list.sort((a, b) => ms(a) - ms(b)));
 
   listEl.innerHTML = parents.map(p =>
     commentHtml(section, p, !!p.replyTo)
-    + (byParent[p.docId] || []).map(r => commentHtml(section, r, true)).join('')
+    + (byParent[p.docId] || []).map(r => commentHtml(section, r, true, p.docId)).join('')
     + (replyingTo[section] === p.docId ? replyFormHtml(section, p) : '')
   ).join('');
 
@@ -1448,14 +1491,15 @@ function renderCommentList(section){
   if(newDraftEl && draft) newDraftEl.value = draft;
 }
 
-function commentHtml(section, c, isReply){
+function commentHtml(section, c, isReply, rootId){
   const name = (c.name || 'Ẩn danh').trim() || 'Ẩn danh';
+  const replyTarget = isReply ? rootId : c.docId; // trả lời 1 trả lời -> vẫn gom về luồng gốc
   return `<div class="comment-item${isReply ? ' is-reply' : ''}">
     <div class="comment-avatar" style="background:${avatarColor(name)}">${escapeHtml(name.charAt(0).toUpperCase())}</div>
     <div class="comment-body">
       <div class="comment-meta"><span class="comment-name">${escapeHtml(name)}</span><span class="comment-time">${timeAgo(c.createdAt)}</span></div>
       <div class="comment-text">${escapeHtml(c.text)}</div>
-      ${isReply ? '' : `<div class="comment-actions"><button class="comment-reply-btn" onclick="toggleReplyForm('${section}','${c.docId}')">↩ Trả lời</button></div>`}
+      ${replyTarget ? `<div class="comment-actions"><button class="comment-reply-btn" onclick="toggleReplyForm('${section}','${replyTarget}','${escJs(name)}')">↩ Trả lời</button></div>` : ''}
     </div>
   </div>`;
 }
@@ -1473,43 +1517,40 @@ function replyFormHtml(section, parent){
   </div>`;
 }
 
-function toggleReplyForm(section, parentId){
+function toggleReplyForm(section, parentId, mention){
   replyingTo[section] = replyingTo[section] === parentId ? null : parentId;
   renderCommentList(section);
   const t = document.getElementById('replyText-' + section);
-  if(t) t.focus();
+  if(t){
+    if(mention && !t.value) t.value = '@' + mention + ' '; // gợi ý đang trả lời ai
+    t.focus();
+  }
 }
 
-async function submitReply(section, parentId){
-  const nameEl = document.getElementById('replyName-' + section);
-  const textEl = document.getElementById('replyText-' + section);
-  const btn = document.getElementById('replySend-' + section);
-  const key = selectedItemKey[section];
-  if(!textEl || !key) return;
-  const name = currentUser
-    ? ((currentUser.displayName || currentUser.email || 'Ẩn danh').trim())
-    : (nameEl ? nameEl.value.trim() : '');
-  const text = textEl.value.trim();
-  if(!name){ if(nameEl) nameEl.focus(); return; }
-  if(!text){ textEl.focus(); return; }
+const AVATAR_COLORS = ['#1E8A85','#D1573C','#D98E2B','#6C5DA8'];
+function avatarColor(name){
+  let h = 0;
+  for(const ch of (name || '?')) h = (h * 31 + ch.charCodeAt(0)) % 997;
+  return AVATAR_COLORS[h % AVATAR_COLORS.length];
+}
+function timeAgo(ts){
+  if(!ts || !ts.toMillis) return 'vừa xong';
+  const sec = Math.floor((Date.now() - ts.toMillis()) / 1000);
+  if(sec < 60) return 'vừa xong';
+  if(sec < 3600) return Math.floor(sec/60) + ' phút trước';
+  if(sec < 86400) return Math.floor(sec/3600) + ' giờ trước';
+  if(sec < 2592000) return Math.floor(sec/86400) + ' ngày trước';
+  return new Date(ts.toMillis()).toLocaleDateString('vi-VN');
+}
 
-  if(!currentUser){ try{ localStorage.setItem(COMMENT_NAME_KEY, name); }catch(e){} }
-  if(btn){ btn.disabled = true; btn.textContent = 'Đang gửi…'; }
-  try{
-    await firebase.firestore().collection(COMMENTS_COLLECTION).add({
-      itemId: key,
-      name: name.slice(0, 40),
-      text: text.slice(0, 1500),
-      replyTo: parentId,
-      createdAt: firebase.firestore.FieldValue.serverTimestamp()
-    });
-    replyingTo[section] = null;
-    renderCommentList(section);
-  }catch(err){
-    console.error('Lỗi gửi trả lời:', err);
-    alert('Gửi trả lời thất bại — kiểm tra Firestore Rules đã cho phép trường "replyTo" chưa.');
-    if(btn){ btn.disabled = false; btn.textContent = 'Gửi trả lời'; }
-  }
+/* Gửi xong tự thêm vào danh sách tại chỗ — không tốn thêm lượt đọc */
+function appendLocalComment(section, key, row){
+  row.createdAt = { toMillis: () => Date.now() };
+  if(!commentRowsCache[key]) commentRowsCache[key] = [];
+  commentRowsCache[key].push(row);
+  const countEl = document.getElementById('commentsCount-' + section);
+  if(countEl) countEl.textContent = commentRowsCache[key].length;
+  renderCommentList(section);
 }
 
 async function submitComment(section){
@@ -1524,22 +1565,50 @@ async function submitComment(section){
   const text = textEl.value.trim();
   if(!name){ if(nameEl) nameEl.focus(); return; }
   if(!text){ textEl.focus(); return; }
-
   if(!currentUser){ try{ localStorage.setItem(COMMENT_NAME_KEY, name); }catch(e){} }
   if(btn){ btn.disabled = true; btn.textContent = 'Đang gửi…'; }
   try{
-    await firebase.firestore().collection(COMMENTS_COLLECTION).add({
-      itemId: key,
-      name: name.slice(0, 40),
-      text: text.slice(0, 1500),
+    const ref = await firebase.firestore().collection(COMMENTS_COLLECTION).add({
+      itemId: key, name: name.slice(0, 40), text: text.slice(0, 1500),
       createdAt: firebase.firestore.FieldValue.serverTimestamp()
     });
     textEl.value = '';
+    appendLocalComment(section, key, { docId: ref.id, itemId: key, name, text });
   }catch(err){
     console.error('Lỗi gửi bình luận:', err);
-    alert('Gửi bình luận thất bại — kiểm tra Firestore Rules đã cho phép ghi vào collection "trongtam_comments" chưa.');
+    alert('Gửi bình luận thất bại — thử lại sau nhé.');
   }finally{
     if(btn){ btn.disabled = false; btn.textContent = 'Gửi bình luận'; }
+  }
+}
+
+async function submitReply(section, parentId){
+  const nameEl = document.getElementById('replyName-' + section);
+  const textEl = document.getElementById('replyText-' + section);
+  const btn = document.getElementById('replySend-' + section);
+  const key = selectedItemKey[section];
+  if(!textEl || !key) return;
+  const name = currentUser
+    ? ((currentUser.displayName || currentUser.email || 'Ẩn danh').trim())
+    : (nameEl ? nameEl.value.trim() : '');
+  const text = textEl.value.trim();
+  if(!name){ if(nameEl) nameEl.focus(); return; }
+  if(!text){ textEl.focus(); return; }
+  if(!currentUser){ try{ localStorage.setItem(COMMENT_NAME_KEY, name); }catch(e){} }
+  if(btn){ btn.disabled = true; btn.textContent = 'Đang gửi…'; }
+  try{
+    const ref = await firebase.firestore().collection(COMMENTS_COLLECTION).add({
+      itemId: key, name: name.slice(0, 40), text: text.slice(0, 1500),
+      replyTo: parentId,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    replyingTo[section] = null;
+    appendLocalComment(section, key, { docId: ref.id, itemId: key, name, text, replyTo: parentId });
+  }catch(err){
+    console.error('Lỗi gửi trả lời:', err);
+    alert('Gửi trả lời thất bại — thử lại sau nhé.');
+  }finally{
+    if(btn){ btn.disabled = false; btn.textContent = 'Gửi trả lời'; }
   }
 }
 
@@ -1769,7 +1838,7 @@ function closeProgressModal(){
 let quizState = { key: null, answers: {}, submitted: false };
 
 function getQuizFor(item){
-  const q = item && item.quiz;
+  const q = item && bankQuizOf(item);
   if(!q || !Array.isArray(q.questions)) return null;
   const questions = q.questions.filter(x =>
     x && (x.q || '').trim() && Array.isArray(x.options) && x.options.filter(o => (o || '').trim()).length >= 2
@@ -1778,6 +1847,18 @@ function getQuizFor(item){
   const draw = Math.min(Math.max(1, parseInt(q.draw) || questions.length), questions.length);
   const pass = Math.min(Math.max(1, parseInt(q.pass) || 1), draw);
   return { pass, draw, questions };
+}
+
+/* Thông tin hiển thị (số câu, mức đạt) — có ngay từ metadata, không cần tải ngân hàng */
+function getQuizInfoFor(item){
+  const q = getQuizFor(item);
+  if(q) return { n: q.questions.length, draw: q.draw, pass: q.pass, loaded: true };
+  const qi = item && item.quizInfo;
+  if(qi && qi.n > 0){
+    const draw = Math.min(Math.max(1, parseInt(qi.draw) || qi.n), qi.n);
+    return { n: qi.n, draw, pass: Math.min(Math.max(1, parseInt(qi.pass) || 1), draw), loaded: false };
+  }
+  return null;
 }
 
 /* Rút ngẫu nhiên "draw" câu từ ngân hàng — mỗi lượt làm là một bộ câu khác nhau */
@@ -1798,8 +1879,11 @@ function currentTheoryQuiz(){
   return idx !== -1 ? getQuizFor(list[idx]) : null;
 }
 
-function openQuizModal(section){
+async function openQuizModal(section){
   quizSection = section || 'theory';
+  const list = itemsInGrade(quizSection);
+  const idx = list.findIndex((item, i) => item.type !== 'folder' && itemKey(quizSection, item, i) === selectedItemKey[quizSection]);
+  if(idx !== -1) await ensureBankFor(list[idx]);
   const quiz = currentTheoryQuiz();
   if(!quiz) return;
   const key = selectedItemKey[quizSection];
@@ -1833,7 +1917,7 @@ function quizContentHtml(quiz, key){
 
   const qsHtml = qList.map((qq, qi) => {
     const chosen = quizState.answers[qi];
-    return `<div class="quiz-q">
+    return `<div class="quiz-q" id="quizq-${quizSection}-${qi}">
       <div class="quiz-q-text">Câu ${qi + 1}. ${escapeHtml(qq.q)}</div>
       ${qq.options.map((op, oi) => {
         if(!(op || '').trim()) return '';
@@ -1864,8 +1948,19 @@ function quizContentHtml(quiz, key){
     footHtml = `<button class="quiz-submit-btn" onclick="submitQuiz()" ${answered < qList.length ? 'disabled' : ''}>Nộp bài (đã chọn ${answered}/${qList.length})</button>`;
   }
 
+  const navHtml = `<div class="quiz-nav">` + qList.map((qq, qi)=>{
+    let cls = quizState.answers[qi] !== undefined ? ' done' : '';
+    if(quizState.submitted) cls = quizState.answers[qi] === (qq.correct || 0) ? ' ok' : ' no';
+    return `<button class="quiz-nav-dot${cls}" onclick="scrollToQuizQ(${qi})" title="Câu ${qi + 1}${cls === ' done' ? ' — đã chọn' : (cls === '' ? ' — chưa làm' : '')}">${qi + 1}</button>`;
+  }).join('') + `</div>`;
+
   const reqText = done ? '✓ Đã hoàn thành bài này' : `Đúng ≥ ${quiz.pass}/${qList.length} câu để hoàn thành`;
-  return { reqText, html: qsHtml + footHtml };
+  return { reqText, qsHtml, navHtml, footHtml, html: qsHtml + navHtml + footHtml };
+}
+
+function scrollToQuizQ(qi){
+  const el = document.getElementById(`quizq-${quizSection}-${qi}`);
+  if(el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
 
 function renderQuizPanel(){
@@ -1924,8 +2019,11 @@ function submitQuiz(){
 /* ============ VIEWER CHỦ ĐỀ TRẮC NGHIỆM (ĐỊNH TÍNH / ĐỊNH LƯỢNG) ============ */
 let practiceActive = { quizTheory: false, quizMath: false }; // đang làm bài ngay trong khung?
 
-function startPractice(section){
+async function startPractice(section){
   quizSection = section;
+  const list = itemsInGrade(section);
+  const idx = list.findIndex((item, i) => item.type !== 'folder' && itemKey(section, item, i) === selectedItemKey[section]);
+  if(idx !== -1) await ensureBankFor(list[idx]); // tải ngân hàng câu hỏi đúng lúc bắt đầu
   const quiz = currentTheoryQuiz();
   if(!quiz) return;
   const key = selectedItemKey[section];
@@ -1940,6 +2038,7 @@ function exitPractice(section){
 function renderPracticeViewer(section){
   const viewerEl = document.getElementById(section + 'Viewer');
   if(!viewerEl) return;
+  viewerEl.classList.remove('practice-mode');
   const list = itemsInGrade(section);
   const realItems = list.filter(x => x.type !== 'folder');
 
@@ -1961,7 +2060,8 @@ function renderPracticeViewer(section){
   }
   const item = list[idx];
   const key = selectedItemKey[section];
-  const quiz = getQuizFor(item);
+  const quiz = getQuizFor(item);        // ngân hàng thật (nếu đã tải)
+  const qInfo = getQuizInfoFor(item);   // thông tin hiển thị (luôn có)
   const done = isDone(key);
 
   // Đang trong lượt luyện tập -> đề hiện ngay trong khung này, không mở popup
@@ -1969,6 +2069,7 @@ function renderPracticeViewer(section){
     quizSection = section;
     ensureQuizStateFor(quiz);
     const c = quizContentHtml(quiz, key);
+    viewerEl.classList.add('practice-mode');
     viewerEl.innerHTML = `
       <div class="reader-viewer-head">
         <h4 title="${escAttr(item.title || '')}">${escapeHtml(item.title) || 'Chưa đặt tiêu đề'}</h4>
@@ -1977,25 +2078,30 @@ function renderPracticeViewer(section){
           <button class="check-pill" onclick="exitPractice('${section}')">✕ Thoát</button>
         </div>
       </div>
-      <div class="reader-viewer-body"><div class="practice-quiz-wrap">${c.html}</div></div>`;
+      <div class="reader-viewer-body">
+        <div class="practice-quiz-flex">
+          <div class="practice-quiz-scroll">${c.qsHtml}</div>
+          <div class="practice-quiz-foot">${c.navHtml}${c.footHtml}</div>
+        </div>
+      </div>`;
     renderCommentsPanel(section);
     return;
   }
   if(practiceActive[section] && quizState.key !== key) practiceActive[section] = false; // chuyển chủ đề khác -> thoát lượt cũ
 
   let pillHtml;
-  if(quiz && !done){
+  if(qInfo && !done){
     pillHtml = `<button class="check-pill locked" onclick="startPractice('${section}')" title="Làm đạt để được tính hoàn thành">🔒 Làm đạt để hoàn thành</button>`;
   } else {
     pillHtml = checkPillHtml(key, 'Đã hoàn thành', 'Đánh dấu hoàn thành');
-    if(quiz) pillHtml += `<button class="check-pill" onclick="startPractice('${section}')" title="Luyện lại bộ câu ngẫu nhiên mới">📝 Làm lại</button>`;
+    if(qInfo) pillHtml += `<button class="check-pill" onclick="startPractice('${section}')" title="Luyện lại bộ câu ngẫu nhiên mới">📝 Làm lại</button>`;
   }
 
-  const body = quiz ? `
+  const body = qInfo ? `
     <div class="exam-intro">
       <div class="exam-intro-icon">${section === 'quizTheory' ? '📖' : '🧮'}</div>
       <h3>${escapeHtml(item.title) || 'Chưa đặt tiêu đề'}</h3>
-      <p>Ngân hàng <strong>${quiz.questions.length}</strong> câu · mỗi lượt rút ngẫu nhiên <strong>${quiz.draw}</strong> câu · đúng ≥ <strong>${quiz.pass}</strong> câu để đạt</p>
+      <p>Ngân hàng <strong>${qInfo.n}</strong> câu · mỗi lượt rút ngẫu nhiên <strong>${qInfo.draw}</strong> câu · đúng ≥ <strong>${qInfo.pass}</strong> câu để đạt</p>
       ${item.note ? `<p class="exam-note">${escapeHtml(item.note)}</p>` : ''}
       <button class="exam-enter-btn" onclick="startPractice('${section}')">🎯 Bắt đầu luyện tập</button>
     </div>`
@@ -2017,7 +2123,7 @@ let examState = null;
 const normShort = v => String(v || '').trim().toLowerCase().replace(/\s+/g, '').replace(/,/g, '.');
 
 function getExamFor(item){
-  const ex = item && item.exam;
+  const ex = item && bankExamOf(item);
   if(!ex) return null;
   const mc = Array.isArray(ex.mc) ? ex.mc : [];
   // Đ/S lưu dạng chuỗi "ĐSSĐ" ('-' = chưa chọn) -> chuyển về mảng ký tự để xử lý
@@ -2032,6 +2138,21 @@ function getExamFor(item){
   return { duration: Math.max(1, parseInt(ex.duration) || 50), mc, tf, short };
 }
 
+function getExamInfoFor(item){
+  const ex = getExamFor(item);
+  if(ex) return { duration: ex.duration, mcN: ex.mc.filter(k => k).length, tfN: ex.tf.length, shortN: ex.short.filter(k => k && String(k).trim()).length, max: examMaxScore(ex), loaded: true };
+  const ei = item && item.examInfo;
+  if(ei && ((ei.mc || 0) + (ei.tf || 0) + (ei.short || 0) > 0)){
+    return {
+      duration: Math.max(1, parseInt(ei.duration) || 50),
+      mcN: ei.mc || 0, tfN: ei.tf || 0, shortN: ei.short || 0,
+      max: +(((ei.mc || 0) * 0.25) + ((ei.tf || 0) * 1) + ((ei.short || 0) * 0.25)).toFixed(2),
+      loaded: false
+    };
+  }
+  return null;
+}
+
 function examMaxScore(exam){
   // Chỉ tính điểm tối đa trên các câu ĐÃ có đáp án
   const mc = exam.mc.filter(k => k).length * 0.25;
@@ -2041,16 +2162,16 @@ function examMaxScore(exam){
   return +(mc + tf + sh).toFixed(2);
 }
 
-function examIntroHtml(item, exam){
+function examIntroHtml(item, info){
   const parts = [];
-  if(exam.mc.length) parts.push(exam.mc.length + ' câu trắc nghiệm');
-  if(exam.tf.length) parts.push(exam.tf.length + ' câu đúng/sai');
-  if(exam.short.length) parts.push(exam.short.length + ' câu trả lời ngắn');
+  if(info.mcN) parts.push(info.mcN + ' câu trắc nghiệm');
+  if(info.tfN) parts.push(info.tfN + ' câu đúng/sai');
+  if(info.shortN) parts.push(info.shortN + ' câu trả lời ngắn');
   return `<div class="exam-intro">
     <div class="exam-intro-icon">🏛</div>
     <h3>Phòng thi online</h3>
-    <p>${parts.join(' · ')} — thang điểm <strong>${examMaxScore(exam)}</strong></p>
-    <p>Thời gian làm bài: <strong>${exam.duration} phút</strong>. Hết giờ hệ thống tự nộp bài.</p>
+    <p>${parts.join(' · ')} — thang điểm <strong>${info.max}</strong></p>
+    <p>Thời gian làm bài: <strong>${info.duration} phút</strong>. Hết giờ hệ thống tự nộp bài.</p>
     <p class="exam-note">Đề chỉ hiển thị bên trong phòng thi, không mở tab khác và không tải về được. Chuẩn bị giấy nháp trước khi vào!</p>
     ${item.file
       ? `<button class="exam-enter-btn" onclick="startExam()">Vào phòng thi →</button>`
@@ -2058,13 +2179,15 @@ function examIntroHtml(item, exam){
   </div>`;
 }
 
-function startExam(){
+async function startExam(){
   const list = itemsInGrade('exercises');
   const idx = list.findIndex((item, i) => item.type !== 'folder' && itemKey('exercises', item, i) === selectedItemKey['exercises']);
   if(idx === -1) return;
   const item = list[idx];
+  if(!item.file){ alert('Đề này chưa gắn file PDF.'); return; }
+  await ensureBankFor(item); // tải đáp án đúng lúc vào thi
   const exam = getExamFor(item);
-  if(!exam || !item.file){ alert('Đề này chưa sẵn sàng (thiếu file hoặc đáp án).'); return; }
+  if(!exam){ alert('Đề này chưa có đáp án — chưa thể vào thi.'); return; }
 
   examState = {
     key: selectedItemKey['exercises'],
@@ -2383,6 +2506,8 @@ function setAuthMode(mode){
   authMode = mode;
   document.getElementById('authTitle').textContent = mode === 'login' ? 'Đăng nhập' : 'Tạo tài khoản';
   document.getElementById('authNameField').style.display = mode === 'register' ? 'block' : 'none';
+  const forgotEl = document.getElementById('authForgot');
+  if(forgotEl) forgotEl.style.display = mode === 'login' ? 'block' : 'none';
   document.getElementById('authSubmitBtn').textContent = mode === 'login' ? 'Đăng nhập' : 'Đăng ký';
   document.getElementById('authSwitch').innerHTML = mode === 'login'
     ? 'Chưa có tài khoản? <a onclick="setAuthMode(\'register\')">Đăng ký</a>'
@@ -2392,8 +2517,38 @@ function setAuthMode(mode){
 function showAuthError(msg){
   const el = document.getElementById('authError');
   if(!el) return;
+  el.classList.remove('ok');
   el.textContent = msg;
   el.style.display = msg ? 'block' : 'none';
+}
+function showAuthOk(msg){
+  const el = document.getElementById('authError');
+  if(!el) return;
+  el.classList.add('ok');
+  el.textContent = msg;
+  el.style.display = 'block';
+}
+
+async function forgotPassword(){
+  const id = (document.getElementById('authId').value || '').trim();
+  if(!id){
+    showAuthError('Nhập email của bạn vào ô "Email hoặc tên đăng nhập" rồi bấm "Quên mật khẩu?".');
+    return;
+  }
+  if(!id.includes('@')){
+    showAuthError('Tài khoản tạo bằng tên đăng nhập không khôi phục qua email được — nếu bạn đăng ký bằng email thì nhập email đó, còn không hãy liên hệ quản trị viên web.');
+    return;
+  }
+  try{
+    await firebase.auth().sendPasswordResetEmail(id.toLowerCase());
+    showAuthOk('✅ Đã gửi email đặt lại mật khẩu tới ' + id + ' — kiểm tra cả hộp thư Spam nhé.');
+  }catch(err){
+    if((err.code || '').includes('user-not-found')){
+      showAuthError('Không tìm thấy tài khoản nào dùng email này.');
+      return;
+    }
+    showAuthError(authErrorVi(err));
+  }
 }
 
 /* Nhập gì cũng được: có @ là email, không có @ là tên đăng nhập (chạy trên nền email ẩn) */
