@@ -378,6 +378,10 @@
   .exam-intro h3{font-size:20px;font-family:'Be Vietnam Pro',sans-serif;}
   .exam-intro p{font-size:13.5px;color:var(--ink-soft);line-height:1.6;max-width:440px;}
   .exam-note{font-size:12px !important;color:var(--ink-faint) !important;}
+  .exam-last{
+    background:var(--teal-tint);color:var(--teal-deep);font-weight:700;font-size:13px;
+    padding:9px 16px;border-radius:999px;
+  }
   .exam-enter-btn{background:var(--ink);color:#fff;font-weight:800;font-size:14.5px;padding:13px 26px;border-radius:12px;margin-top:6px;}
   .exam-enter-btn:hover{background:var(--teal-deep);}
   html[data-theme="dark"] .exam-enter-btn{color:#0F1420;}
@@ -2324,7 +2328,29 @@ function examMaxScore(exam){
   return +(mc + tf + sh).toFixed(2);
 }
 
+/* Kết quả làm đề gần nhất: lưu trên máy + đối chiếu lịch sử tài khoản (đồng bộ máy khác) */
+const EXAM_RESULTS_KEY = 'trongtam_exam_results';
+function saveExamResult(itemId, res){
+  try{
+    const m = JSON.parse(localStorage.getItem(EXAM_RESULTS_KEY)) || {};
+    m[itemId] = { score: res.total, max: res.max, t: Date.now() };
+    localStorage.setItem(EXAM_RESULTS_KEY, JSON.stringify(m));
+  }catch(e){}
+}
+function lastExamResult(itemId){
+  let local = null;
+  try{ local = (JSON.parse(localStorage.getItem(EXAM_RESULTS_KEY)) || {})[itemId] || null; }catch(e){}
+  let fromHist = null;
+  for(let i = userHistory.length - 1; i >= 0; i--){
+    const h = userHistory[i];
+    if(h.type === 'exam' && h.itemId === itemId){ fromHist = { score: h.score, max: h.total, t: h.t }; break; }
+  }
+  if(local && fromHist) return local.t >= fromHist.t ? local : fromHist;
+  return local || fromHist;
+}
+
 function examIntroHtml(item, info){
+  const last = lastExamResult(bankIdOf(item));
   const parts = [];
   if(info.mcN) parts.push(info.mcN + ' câu trắc nghiệm');
   if(info.tfN) parts.push(info.tfN + ' câu đúng/sai');
@@ -2335,8 +2361,9 @@ function examIntroHtml(item, info){
     <p>${parts.join(' · ')} — thang điểm <strong>${info.max}</strong></p>
     <p>Thời gian làm bài: <strong>${info.duration} phút</strong>. Hết giờ hệ thống tự nộp bài.</p>
     <p class="exam-note">Đề chỉ hiển thị bên trong phòng thi, không mở tab khác và không tải về được. Chuẩn bị giấy nháp trước khi vào!</p>
+    ${last ? `<div class="exam-last">Lần làm gần nhất: ${last.score}/${last.max} điểm · ${histTimeAgo(last.t)}</div>` : ''}
     ${item.file
-      ? `<button class="exam-enter-btn" onclick="startExam()">Vào phòng thi →</button>`
+      ? `<button class="exam-enter-btn" onclick="startExam()">${last ? 'Làm lại đề →' : 'Vào phòng thi →'}</button>`
       : `<p class="exam-note">⚠️ Đề chưa gắn file PDF — chưa thể vào thi.</p>`}
   </div>`;
 }
@@ -2501,6 +2528,7 @@ function submitExam(auto){
     shortTotal: s.exam.short.filter(k => k && String(k).trim()).length
   };
   logHistory({ type: 'exam', itemId: s.key, title: s.title, where: sectionLabelNow('exercises'), score: total, total: s.result.max });
+  saveExamResult(s.key, s.result);
   renderExamResult();
 }
 
@@ -2557,6 +2585,7 @@ function exitExam(){
   examState = null;
   document.getElementById('examOverlay').classList.remove('open');
   document.getElementById('examSubmitBtn').style.display = '';
+  renderExercises(); // cập nhật khung chính để hiện kết quả gần nhất
 }
 
 /* ============ GIAO DIỆN SÁNG / TỐI ============ */
