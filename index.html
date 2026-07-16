@@ -347,8 +347,7 @@
   .quiz-nav-dot:hover{border-color:var(--ink);color:var(--ink);}
   .quiz-nav-dot.done{background:var(--ink);border-color:var(--ink);color:#fff;}
   html[data-theme="dark"] .quiz-nav-dot.done{color:#0F1420;}
-  .quiz-nav-dot.cur{outline:2.5px solid var(--ink);outline-offset:2px;}
-  html[data-theme="dark"] .quiz-nav-dot.cur{outline-color:var(--ink);}
+  .quiz-nav-dot.cur{outline:2.5px solid var(--coral);outline-offset:2px;box-shadow:0 0 8px rgba(209,87,60,.45);}
   .quiz-nav-dot.ok{background:var(--teal-tint);border-color:var(--teal);color:var(--teal-deep);}
   .quiz-nav-dot.no{background:var(--coral-tint);border-color:var(--coral);color:var(--coral-deep);}
   .practice-quiz-foot .quiz-submit-btn{margin-top:0;}
@@ -1987,7 +1986,7 @@ function quizContentHtml(quiz, key){
   const navHtml = `<div class="quiz-nav">` + qList.map((qq, qi)=>{
     let cls = quizState.answers[qi] !== undefined ? ' done' : '';
     if(quizState.submitted) cls = quizState.answers[qi] === (qq.correct || 0) ? ' ok' : ' no';
-    if(quizState.current === qi) cls += ' cur'; // ô vừa bấm -> viền nổi bật
+    if(quizState.current === qi) cls += ' cur'; // ô vừa bấm -> viền màu nổi bật
     return `<button class="quiz-nav-dot${cls}" onclick="scrollToQuizQ(${qi})" title="Câu ${qi + 1}${cls === ' done' ? ' — đã chọn' : (cls === '' ? ' — chưa làm' : '')}">${qi + 1}</button>`;
   }).join('') + `</div>`;
 
