@@ -190,31 +190,48 @@
     max-height:calc(100vh - 112px);overflow-y:auto;overscroll-behavior:contain;
   }
   .reader-item{
-    padding:11px 12px;border-radius:9px;cursor:pointer;margin-bottom:3px;transition:.12s;
+    display:flex;align-items:flex-start;gap:10px;
+    padding:10px 12px;border-radius:9px;cursor:pointer;margin-bottom:3px;transition:.12s;
     border:1px solid transparent;
   }
   .reader-item:hover{background:var(--paper);}
+  .reader-item:hover h5{color:var(--ink);}
   .reader-item.active.theory{background:var(--teal-tint);border-color:var(--teal);}
   .reader-item.active.exercise{background:var(--coral-tint);border-color:var(--coral);}
   .reader-item.active.solution{background:var(--amber-tint);border-color:var(--amber);}
-  .reader-item h5{font-size:13.5px;font-weight:700;line-height:1.45;word-break:break-word;}
-  .reader-item .meta{display:flex;align-items:center;gap:7px;margin-top:5px;font-size:11px;color:var(--ink-faint);}
+  .reader-item.active h5{color:var(--ink);}
+  .reader-num{
+    flex-shrink:0;min-width:20px;text-align:center;margin-top:1px;line-height:1.4;
+    font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;color:var(--ink-faint);
+  }
+  .reader-item:hover .reader-num{color:var(--ink-soft);}
+  .reader-item.active .reader-num{color:var(--ink);}
+  .reader-item.is-done .reader-num{color:var(--teal-deep);}
+  .reader-item-body{flex:1;min-width:0;}
+  .reader-item h5{font-size:14px;font-weight:600;line-height:1.4;word-break:break-word;color:var(--ink);}
+  .reader-item .meta{display:flex;align-items:center;gap:7px;margin-top:4px;font-size:11px;color:var(--ink-faint);}
   .reader-item .done-dot{width:7px;height:7px;border-radius:50%;background:var(--teal);flex-shrink:0;}
 
   .reader-folder{margin-bottom:2px;}
   .folder-header{
-    display:flex;align-items:center;gap:7px;padding:10px 10px;border-radius:9px;cursor:pointer;
-    font-weight:700;font-size:12.5px;color:var(--ink-soft);user-select:none;
+    display:flex;align-items:center;gap:11px;padding:11px 13px;border-radius:11px;cursor:pointer;
+    user-select:none;background:var(--paper);margin-bottom:6px;transition:background .12s;
   }
-  .folder-header:hover{background:var(--paper);color:var(--ink);}
-  .folder-header.has-active{color:var(--ink);}
-  .folder-chevron{font-size:9px;width:9px;flex-shrink:0;color:var(--ink-faint);}
-  .folder-icon{flex-shrink:0;font-size:13px;}
-  .folder-name{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-  .folder-count{
-    font-family:'JetBrains Mono',monospace;font-size:9.5px;font-weight:700;color:var(--ink-faint);
-    background:var(--paper);padding:1px 6px;border-radius:999px;flex-shrink:0;
+  .folder-header:hover{background:var(--paper-line);}
+  .folder-header.has-active{background:var(--teal-tint);}
+  .folder-icon{
+    flex-shrink:0;font-size:16px;width:32px;height:32px;border-radius:8px;background:var(--white);
+    display:flex;align-items:center;justify-content:center;
   }
+  .folder-header.has-active .folder-icon{background:var(--white);}
+  .folder-main{flex:1;min-width:0;}
+  .folder-name{
+    font-weight:800;font-size:13.5px;color:var(--ink);line-height:1.3;letter-spacing:-.01em;word-break:break-word;
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+  }
+  .folder-sub{font-size:11px;font-weight:600;color:var(--ink-faint);margin-top:2px;}
+  .folder-header.has-active .folder-sub{color:var(--teal-deep);}
+  .folder-chevron{flex-shrink:0;font-size:11px;color:var(--ink-faint);}
   .folder-body{
     padding-left:10px;border-left:2px solid var(--paper-line);margin-left:15px;
     max-height:3000px;overflow:hidden;opacity:1;
@@ -323,6 +340,28 @@
   .quiz-opt.chosen{border-color:var(--teal);background:var(--teal-tint);}
   .quiz-opt.correct{border-color:var(--teal);background:var(--teal-tint);font-weight:700;}
   .quiz-opt.wrong{border-color:var(--coral);background:var(--coral-tint);}
+  .quiz-type-tag{display:inline-block;font-size:10.5px;font-weight:700;color:var(--amber-deep);background:var(--amber-tint);padding:2px 8px;border-radius:999px;margin-right:4px;vertical-align:1px;}
+  /* Phiếu ĐÚNG/SAI — bảng 2 cột Đúng/Sai tô ô tròn, như phiếu trả lời thi tốt nghiệp */
+  .quiz-tf-stmt-line{font-size:13.5px;line-height:1.6;margin-bottom:4px;}
+  .tf-sheet{border-collapse:separate;border-spacing:0;margin:8px 0 2px;background:var(--white);border:1px solid var(--paper-line);border-radius:10px;overflow:hidden;}
+  .tf-sheet th{font-size:11.5px;font-weight:800;color:var(--ink-soft);padding:7px 16px;text-align:center;border-bottom:1px solid var(--paper-line);background:var(--paper);}
+  .tf-sheet td{padding:6px 16px;text-align:center;}
+  .tf-sheet td:first-child{font-weight:700;font-size:12.5px;color:var(--ink);width:36px;}
+  .tf-sheet tr.ok td{background:var(--teal-tint);}
+  .tf-sheet tr.no td{background:var(--coral-tint);}
+  .tf-bubble{width:26px;height:26px;border-radius:50%;border:1.5px solid var(--ink-faint);background:var(--white);cursor:pointer;display:inline-block;vertical-align:middle;padding:0;}
+  .tf-bubble:hover{border-color:var(--ink);}
+  .tf-bubble.sel{background:var(--ink);border-color:var(--ink);}
+  .tf-bubble.key{box-shadow:0 0 0 2.5px var(--teal);}
+  .tf-bubble:disabled{cursor:default;}
+  /* Phiếu TRẢ LỜI NGẮN — 4 ô ký tự, như phiếu trả lời thi tốt nghiệp */
+  .short-cells{display:flex;gap:7px;margin-top:2px;}
+  .short-cell{width:40px;height:46px;border:1.5px solid var(--paper-line);border-radius:9px;text-align:center;font-size:19px;font-weight:700;font-family:'JetBrains Mono',monospace;background:var(--white);color:var(--ink);outline:none;padding:0;}
+  .short-cell:focus{border-color:var(--ink);}
+  .short-cells.correct .short-cell{border-color:var(--teal);background:var(--teal-tint);}
+  .short-cells.wrong .short-cell{border-color:var(--coral);background:var(--coral-tint);}
+  .short-hint{font-size:11.5px;color:var(--ink-faint);margin-top:6px;}
+  .quiz-short-key{font-size:13px;font-weight:600;color:var(--teal-deep);margin-top:7px;}
   .quiz-submit-btn{
     width:100%;background:var(--ink);color:#fff;font-weight:700;font-size:13.5px;
     padding:11px;border-radius:10px;margin-top:4px;
@@ -330,6 +369,11 @@
   .quiz-submit-btn:hover{background:var(--teal-deep);}
   .quiz-submit-btn:disabled{opacity:.5;pointer-events:none;}
   html[data-theme="dark"] .quiz-submit-btn{color:#0F1420;}
+  .quiz-retry-row{display:flex;flex-direction:column;gap:8px;}
+  .quiz-retry-row .quiz-submit-btn{margin-top:0;}
+  .quiz-submit-btn.quiz-btn-alt{background:var(--white);color:var(--ink-soft);border:1.5px solid var(--paper-line);}
+  .quiz-submit-btn.quiz-btn-alt:hover{background:var(--paper);color:var(--ink);border-color:var(--ink-faint);}
+  html[data-theme="dark"] .quiz-submit-btn.quiz-btn-alt{color:var(--ink-soft);}
   .quiz-result{
     padding:12px 14px;border-radius:10px;font-size:13.5px;font-weight:700;margin-top:4px;margin-bottom:8px;line-height:1.6;
   }
@@ -342,6 +386,17 @@
     flex-shrink:0;padding:10px 22px 14px;border-top:1px solid var(--paper-line);
     background:var(--white);
   }
+  .quiz-pager{display:flex;align-items:center;gap:10px;}
+  .quiz-pager-pos{flex:1;text-align:center;font-size:12.5px;font-weight:700;color:var(--ink-soft);white-space:nowrap;}
+  .quiz-pager-btn{
+    padding:10px 16px;border-radius:9px;font-weight:700;font-size:13px;white-space:nowrap;
+    background:var(--white);color:var(--ink);border:1.5px solid var(--paper-line);
+  }
+  .quiz-pager-btn:hover:not(:disabled){border-color:var(--ink);}
+  .quiz-pager-btn:disabled{opacity:.4;pointer-events:none;}
+  .quiz-pager-btn.primary{background:var(--ink);color:#fff;border-color:var(--ink);}
+  .quiz-pager-btn.primary:hover{background:var(--teal-deep);border-color:var(--teal-deep);}
+  html[data-theme="dark"] .quiz-pager-btn.primary{color:#0F1420;}
   .quiz-nav{
     display:flex;flex-wrap:wrap;gap:5px;margin-bottom:9px;position:relative;
     max-height:72px;overflow-y:auto;padding-right:2px;scrollbar-width:thin;
@@ -354,7 +409,8 @@
   .quiz-nav-dot:hover{border-color:var(--ink);color:var(--ink);}
   .quiz-nav-dot.done{background:var(--ink);border-color:var(--ink);color:#fff;}
   html[data-theme="dark"] .quiz-nav-dot.done{color:#0F1420;}
-  .quiz-nav-dot.cur{border-color:var(--coral) !important;box-shadow:0 0 0 1.5px var(--coral);}
+  .quiz-nav-dot.cur{border-color:var(--ink) !important;color:var(--ink);}
+  .quiz-nav-dot.done.cur{box-shadow:0 0 0 2px var(--white),0 0 0 3.5px var(--ink);}
   .quiz-nav-dot.ok{background:var(--teal-tint);border-color:var(--teal);color:var(--teal-deep);}
   .quiz-nav-dot.no{background:var(--coral-tint);border-color:var(--coral);color:var(--coral-deep);}
   .practice-quiz-foot .quiz-submit-btn{margin-top:0;}
@@ -384,7 +440,23 @@
   }
   .exam-enter-btn{background:var(--ink);color:#fff;font-weight:800;font-size:14.5px;padding:13px 26px;border-radius:12px;margin-top:6px;}
   .exam-enter-btn:hover{background:var(--teal-deep);}
+  .exam-enter-btn:disabled{opacity:.4;pointer-events:none;}
   html[data-theme="dark"] .exam-enter-btn{color:#0F1420;}
+  .diff-label{font-size:12px;font-weight:700;color:var(--ink-faint);margin:4px 0 2px;text-transform:uppercase;letter-spacing:.05em;}
+  .diff-row{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:6px;}
+  .diff-btn{
+    display:inline-flex;align-items:center;gap:7px;padding:8px 15px;border-radius:999px;
+    font-weight:700;font-size:13px;color:var(--ink-soft);background:var(--white);border:1.5px solid var(--paper-line);
+  }
+  .diff-btn b{font-family:'JetBrains Mono',monospace;font-size:11px;background:var(--paper);padding:1px 7px;border-radius:999px;color:var(--ink-soft);}
+  .diff-btn:hover:not(:disabled):not(.on){border-color:var(--ink);color:var(--ink);}
+  .diff-btn.on{background:var(--ink);border-color:var(--ink);color:#fff;}
+  .diff-btn.on:hover{background:var(--teal-deep);border-color:var(--teal-deep);color:#fff;}
+  html[data-theme="dark"] .diff-btn.on:hover{color:#0F1420;}
+  .diff-btn.on b{background:rgba(255,255,255,.22);color:#fff;}
+  html[data-theme="dark"] .diff-btn.on{color:#0F1420;}
+  html[data-theme="dark"] .diff-btn.on b{color:#0F1420;}
+  .diff-btn.empty{opacity:.4;pointer-events:none;}
   .exam-overlay{position:fixed;inset:0;z-index:650;background:var(--paper);display:none;flex-direction:column;}
   .exam-overlay.open{display:flex;}
   .exam-top{display:flex;align-items:center;gap:12px;padding:12px 18px;background:var(--white);border-bottom:1px solid var(--paper-line);flex-shrink:0;flex-wrap:wrap;}
@@ -875,6 +947,18 @@
         <h3>Trắc nghiệm định lượng</h3>
         <div class="hub-card-foot"><span class="hub-count mono" id="count-ex-quizMath">0 chủ đề</span><span class="hub-go">Luyện ngay →</span></div>
       </div>
+      <div class="hub-card c-amber" onclick="openExPart('quizTf')">
+        <div class="bar"></div>
+        <div class="hub-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#A9691A" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div>
+        <h3>Bài tập đúng sai</h3>
+        <div class="hub-card-foot"><span class="hub-count mono" id="count-ex-quizTf">0 chủ đề</span><span class="hub-go">Luyện ngay →</span></div>
+      </div>
+      <div class="hub-card c-teal" onclick="openExPart('quizShort')">
+        <div class="bar"></div>
+        <div class="hub-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#136560" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></div>
+        <h3>Bài tập trả lời ngắn</h3>
+        <div class="hub-card-foot"><span class="hub-count mono" id="count-ex-quizShort">0 chủ đề</span><span class="hub-go">Luyện ngay →</span></div>
+      </div>
     </div>
   </div>
 
@@ -910,6 +994,24 @@
         <div class="reader-main">
           <div class="reader-viewer" id="quizMathViewer"></div>
           <div class="comments-panel" id="quizMathComments" style="display:none;"></div>
+        </div>
+      </div>
+    </div>
+    <div class="ex-pane" id="exPane-quizTf" style="display:none;">
+      <div class="reader-layout">
+        <div class="reader-list" id="quizTfList"></div>
+        <div class="reader-main">
+          <div class="reader-viewer" id="quizTfViewer"></div>
+          <div class="comments-panel" id="quizTfComments" style="display:none;"></div>
+        </div>
+      </div>
+    </div>
+    <div class="ex-pane" id="exPane-quizShort" style="display:none;">
+      <div class="reader-layout">
+        <div class="reader-list" id="quizShortList"></div>
+        <div class="reader-main">
+          <div class="reader-viewer" id="quizShortViewer"></div>
+          <div class="comments-panel" id="quizShortComments" style="display:none;"></div>
         </div>
       </div>
     </div>
@@ -1054,7 +1156,7 @@ const firebaseConfig = {
 };
 /* ================================================================ */
 
-let data = { theory: [], exercises: [], solutions: [], quizTheory: [], quizMath: [] };
+let data = { theory: [], exercises: [], solutions: [], quizTheory: [], quizMath: [], quizTf: [], quizShort: [] };
 
 /* ============ NGÂN HÀNG CÂU HỎI & ĐÁP ÁN TÁCH RIÊNG — chỉ tải khi cần ============ */
 const bankCache = {}; // { [itemId]: { quiz, exam } }
@@ -1069,7 +1171,7 @@ function bankIdOf(item){ return item._id || item.id; }
 async function ensureBankFor(item){
   const id = bankIdOf(item);
   if(!id) return;
-  if(item.quiz || item.exam){ bankCache[id] = { quiz: item.quiz || null, exam: item.exam || null }; return; } // dữ liệu kiểu cũ nhúng sẵn
+  if(item.quiz || item.exam || item.cbank){ bankCache[id] = { quiz: item.quiz || null, exam: item.exam || null, cbank: item.cbank || null }; return; } // dữ liệu kiểu cũ nhúng sẵn
   if(bankCache[id]) return;
   try{
     const snap = await firebase.firestore().collection('trongtam_banks').doc(id).get();
@@ -1081,6 +1183,126 @@ async function ensureBankFor(item){
 }
 function bankQuizOf(item){ return (item && item.quiz) || (bankCache[bankIdOf(item)] || {}).quiz || null; }
 function bankExamOf(item){ return (item && item.exam) || (bankCache[bankIdOf(item)] || {}).exam || null; }
+function bankCbankOf(item){ return (item && item.cbank) || (bankCache[bankIdOf(item)] || {}).cbank || null; }
+
+/* ---- NGÂN HÀNG CẤP CHƯƠNG: câu hỏi lưu trên thư mục, mỗi câu gán topic = id bài học ---- */
+function folderOfItem(section, item){
+  if(!item || !item.folderId || !data[section]) return null;
+  return data[section].find(x => x.type === 'folder' && bankIdOf(x) === item.folderId) || null;
+}
+async function ensureQuizBanksFor(section, item){
+  const folder = folderOfItem(section, item);
+  if(folder) await ensureBankFor(folder); // tải ngân hàng chương trước (nếu có)
+  await ensureBankFor(item);              // và ngân hàng riêng của bài (fallback)
+}
+/* ---- Câu hỏi 3 dạng: mc (trắc nghiệm), tf (đúng/sai nhiều ý), short (trả lời ngắn) ---- */
+function tfPairs(qq){
+  const sts = Array.isArray(qq.statements) ? qq.statements : [];
+  const key = String(qq.answers || '');
+  const out = [];
+  sts.forEach((s, i) => { if((s || '').trim() && (key[i] === 'Đ' || key[i] === 'S')) out.push({ s, k: key[i], i }); });
+  return out;
+}
+function isValidQuizQ(x){
+  if(!x || !(x.q || '').trim()) return false;
+  if(x.type === 'tf') return tfPairs(x).length >= 2;
+  if(x.type === 'short') return !!(x.answer != null && String(x.answer).trim());
+  return Array.isArray(x.options) && x.options.filter(o => (o || '').trim()).length >= 2;
+}
+function shortAnsStr(ans){ return (Array.isArray(ans) ? ans.join('') : String(ans == null ? '' : ans)).replace(/−/g, '-'); }
+function quizAnswerDone(qq, ans){
+  if(qq.type === 'tf') return tfPairs(qq).every(p => Array.isArray(ans) && (ans[p.i] === 'Đ' || ans[p.i] === 'S'));
+  if(qq.type === 'short') return !!shortAnsStr(ans).trim();
+  return ans !== undefined;
+}
+function quizAnswerCorrect(qq, ans){
+  if(qq.type === 'tf') return tfPairs(qq).every(p => Array.isArray(ans) && ans[p.i] === p.k);
+  if(qq.type === 'short') return normShort(shortAnsStr(ans)) === normShort(qq.answer);
+  return ans === (qq.correct || 0);
+}
+function quizPartsText(q){
+  if(q.drawMc == null || (!q.drawTf && !q.drawSh)) return '';
+  const p = [];
+  if(q.drawMc) p.push(q.drawMc + ' trắc nghiệm');
+  if(q.drawTf) p.push(q.drawTf + ' đúng/sai');
+  if(q.drawSh) p.push(q.drawSh + ' trả lời ngắn');
+  return p.join(' + ');
+}
+
+/* Mục chuyên biệt: Bài tập đúng sai chỉ rút câu tf, Bài tập trả lời ngắn chỉ rút câu short */
+const SECTION_QTYPE = { theory: 'mc', quizTheory: 'mc', quizMath: 'mc', quizTf: 'tf', quizShort: 'short' };
+
+/* ===== MỨC ĐỘ CÂU HỎI: easy (Nhận biết/Thông hiểu) · medium (Vận dụng) · hard (Vận dụng cao) ===== */
+function levelOf(q){ const l = q && q.level; return (l === 'medium' || l === 'hard') ? l : 'easy'; }
+function matchDiff(q, diff){ return (!diff || diff === 'all') ? true : levelOf(q) === diff; }
+/* Học sinh chọn mức khi luyện tập; quiz cuối bài LUÔN chỉ lấy câu Dễ (nhận biết/thông hiểu) */
+let practiceLevel = { quizTheory: 'all', quizMath: 'all', quizTf: 'all', quizShort: 'all' };
+function sectionDiff(section){ return section === 'theory' ? 'easy' : (practiceLevel[section] || 'all'); }
+/* Toàn bộ câu đủ điều kiện (đúng dạng + hợp lệ) của 1 bài, CHƯA lọc mức độ — để đếm số câu từng mức */
+function eligibleQuestionsFor(section, item){
+  const only = SECTION_QTYPE[section];
+  const folder = folderOfItem(section, item);
+  if(folder){
+    const cb = bankCbankOf(folder);
+    if(cb && Array.isArray(cb.questions)){
+      const lid = bankIdOf(item);
+      const qs = cb.questions.filter(x => x && x.topic === lid && isValidQuizQ(x) && (!only || (x.type || 'mc') === only));
+      if(qs.length) return qs;
+    }
+  }
+  const q = bankQuizOf(item);
+  if(q && Array.isArray(q.questions)) return q.questions.filter(x => isValidQuizQ(x) && (!only || (x.type || 'mc') === only));
+  return [];
+}
+function quizLevelCounts(section, item){
+  const c = { all: 0, easy: 0, medium: 0, hard: 0 };
+  eligibleQuestionsFor(section, item).forEach(q => { c.all++; c[levelOf(q)]++; });
+  return c;
+}
+function setPracticeLevel(section, diff){ practiceLevel[section] = diff; renderPracticeViewer(section); }
+
+/* Quiz dựng từ ngân hàng chương: chỉ lấy các câu có topic = id bài đang học */
+function chapterQuizFor(section, item){
+  const folder = folderOfItem(section, item);
+  if(!folder) return null;
+  const cb = bankCbankOf(folder);
+  if(!cb || !Array.isArray(cb.questions)) return null;
+  const lid = bankIdOf(item);
+  const only = SECTION_QTYPE[section];
+  const diff = sectionDiff(section);
+  const questions = cb.questions.filter(x => x && x.topic === lid && isValidQuizQ(x) && (!only || (x.type || 'mc') === only) && matchDiff(x, diff));
+  if(questions.length === 0) return null;
+  const nMc = questions.filter(q => !q.type || q.type === 'mc').length;
+  const nTf = questions.filter(q => q.type === 'tf').length;
+  const nSh = questions.filter(q => q.type === 'short').length;
+  const cq = item.cquiz || {};
+  const clampN = (v, def, max) => max <= 0 ? 0 : Math.min(Math.max(1, parseInt(v) || def), max);
+  const drawMc = clampN(cq.draw, Math.min(10, nMc), nMc);
+  const drawTf = clampN(cq.tf, Math.min(4, nTf), nTf);
+  const drawSh = clampN(cq.sh, Math.min(6, nSh), nSh);
+  const draw = drawMc + drawTf + drawSh;
+  const pass = Math.min(Math.max(1, parseInt(cq.pass) || Math.ceil(draw * 0.7)), draw);
+  return { pass, draw, drawMc, drawTf, drawSh, questions };
+}
+/* Thông tin hiển thị từ metadata của thư mục (bankInfo) — chưa cần tải ngân hàng */
+function chapterQuizInfoFor(section, item){
+  const folder = folderOfItem(section, item);
+  const bi = folder && folder.bankInfo;
+  const rec = (bi && bi.topics) ? bi.topics[bankIdOf(item)] : null;
+  const only = SECTION_QTYPE[section]; // 'mc' | 'tf' | 'short'
+  let n = 0;
+  if(rec != null){
+    if(typeof rec === 'number') n = rec; // dữ liệu cũ (chưa tách dạng) — getQuizFor sẽ xác nhận khi tải ngân hàng
+    else { const k = only === 'tf' ? 'tf' : (only === 'short' ? 'sh' : 'mc'); n = only ? (rec[k] || 0) : ((rec.mc || 0) + (rec.tf || 0) + (rec.sh || 0)); }
+  }
+  if(n <= 0) return null;
+  const cq = item.cquiz || {};
+  const drawField = only === 'tf' ? cq.tf : (only === 'short' ? cq.sh : cq.draw);
+  const defDraw = only === 'tf' ? Math.min(4, n) : (only === 'short' ? Math.min(6, n) : Math.min(10, n));
+  const draw = Math.min(Math.max(1, parseInt(drawField) || defDraw), n);
+  const pass = Math.min(Math.max(1, parseInt(cq.pass) || Math.ceil(draw * 0.7)), draw);
+  return { n, draw, pass, loaded: false };
+}
 
 /* ============ TIẾN TRÌNH HỌC TẬP (lưu riêng trên trình duyệt này) ============ */
 const PROGRESS_KEY = 'trongtam_progress_v1';
@@ -1175,14 +1397,18 @@ const SECTION_META = {
     exercises: { title:'Bài tập',       go:'Xem đề bài →',   desc:'Tải đề bài tập PDF về làm, sau đó qua mục "Chữa bài tập" để đối chiếu.', empty:'Hiện chưa có đề bài tập nào.' },
     solutions: { title:'Chữa bài tập',  go:'Xem video →',    desc:'Video chữa chi tiết — làm bài xong rồi hẵng xem để đối chiếu cách giải.', empty:'Hiện chưa có video chữa bài nào.' },
     quizTheory:{ title:'Trắc nghiệm định tính', go:'', desc:'', empty:'Chưa có chủ đề trắc nghiệm định tính nào.' },
-    quizMath:  { title:'Trắc nghiệm định lượng', go:'', desc:'', empty:'Chưa có chủ đề trắc nghiệm định lượng nào.' }
+    quizMath:  { title:'Trắc nghiệm định lượng', go:'', desc:'', empty:'Chưa có chủ đề trắc nghiệm định lượng nào.' },
+    quizTf:    { title:'Bài tập đúng sai', go:'', desc:'', empty:'Chưa có chủ đề bài tập đúng sai nào.' },
+    quizShort: { title:'Bài tập trả lời ngắn', go:'', desc:'', empty:'Chưa có chủ đề bài tập trả lời ngắn nào.' }
   },
   dh: {
     theory:    { title:'Chuyên đề',       go:'Xem chuyên đề →', desc:'Tài liệu ôn tập tổng hợp theo từng chuyên đề trọng tâm thi Đại học.', empty:'Hiện chưa có chuyên đề nào.' },
     exercises: { title:'Đề thực chiến',   go:'Xem đề thi →',    desc:'Đề thi thử bám sát cấu trúc đề thi Đại học — làm đúng thời gian quy định.', empty:'Hiện chưa có đề thực chiến nào.' },
     solutions: { title:'Chữa đề',         go:'Xem video →',     desc:'Video chữa chi tiết từng đề thi thử — làm xong đề rồi hẵng xem.', empty:'Hiện chưa có video chữa đề nào.' },
     quizTheory:{ title:'Trắc nghiệm định tính', go:'', desc:'', empty:'Chưa có chủ đề trắc nghiệm định tính nào.' },
-    quizMath:  { title:'Trắc nghiệm định lượng', go:'', desc:'', empty:'Chưa có chủ đề trắc nghiệm định lượng nào.' }
+    quizMath:  { title:'Trắc nghiệm định lượng', go:'', desc:'', empty:'Chưa có chủ đề trắc nghiệm định lượng nào.' },
+    quizTf:    { title:'Bài tập đúng sai', go:'', desc:'', empty:'Chưa có chủ đề bài tập đúng sai nào.' },
+    quizShort: { title:'Bài tập trả lời ngắn', go:'', desc:'', empty:'Chưa có chủ đề bài tập trả lời ngắn nào.' }
   }
 };
 function sectionMeta(section){
@@ -1209,7 +1435,7 @@ function goBackToGrade(){
   document.getElementById('view-grade').classList.add('active');
   saveNavState('view-grade');
 }
-const EX_PART_TITLES = { exam:'Làm đề', quizTheory:'Trắc nghiệm định tính', quizMath:'Trắc nghiệm định lượng' };
+const EX_PART_TITLES = { exam:'Làm đề', quizTheory:'Trắc nghiệm định tính', quizMath:'Trắc nghiệm định lượng', quizTf:'Bài tập đúng sai', quizShort:'Bài tập trả lời ngắn' };
 
 function openExHub(){
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
@@ -1249,16 +1475,20 @@ function goTo(section){
 }
 
 function renderAll(){
-  renderTheory(); renderExercises(); renderSolutions(); renderQuizTheory(); renderQuizMath();
+  renderTheory(); renderExercises(); renderSolutions(); renderQuizTheory(); renderQuizMath(); renderQuizTf(); renderQuizShort();
   document.getElementById('count-theory').textContent = realItemsInGrade('theory').length + ' file';
   document.getElementById('count-exercises').textContent =
-    (realItemsInGrade('exercises').length + realItemsInGrade('quizTheory').length + realItemsInGrade('quizMath').length) + ' mục';
+    (realItemsInGrade('exercises').length + realItemsInGrade('quizTheory').length + realItemsInGrade('quizMath').length + realItemsInGrade('quizTf').length + realItemsInGrade('quizShort').length) + ' mục';
   const cExam = document.getElementById('count-ex-exam');
   if(cExam) cExam.textContent = realItemsInGrade('exercises').length + ' đề';
   const cQt = document.getElementById('count-ex-quizTheory');
   if(cQt) cQt.textContent = realItemsInGrade('quizTheory').length + ' chủ đề';
   const cQm = document.getElementById('count-ex-quizMath');
   if(cQm) cQm.textContent = realItemsInGrade('quizMath').length + ' chủ đề';
+  const cTf = document.getElementById('count-ex-quizTf');
+  if(cTf) cTf.textContent = realItemsInGrade('quizTf').length + ' chủ đề';
+  const cSh = document.getElementById('count-ex-quizShort');
+  if(cSh) cSh.textContent = realItemsInGrade('quizShort').length + ' chủ đề';
   document.getElementById('count-solutions').textContent = realItemsInGrade('solutions').length + ' video';
   updateProgressUI();
   updateGradeHomeCounts();
@@ -1266,7 +1496,7 @@ function renderAll(){
 
 function updateGradeHomeCounts(){
   ['10','11','12','dh'].forEach(g=>{
-    const total = ['theory','exercises','solutions','quizTheory','quizMath'].reduce((sum, sec)=>
+    const total = ['theory','exercises','solutions','quizTheory','quizMath','quizTf','quizShort'].reduce((sum, sec)=>
       sum + data[sec].filter(it => (it.grade || '11') === g && it.type !== 'folder').length, 0);
     const el = document.getElementById('count-grade-' + g);
     if(el) el.textContent = total + ' mục';
@@ -1295,27 +1525,30 @@ function updateProgressUI(){
 const pdfIcon = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><polyline points="14 2 14 8 20 8"/></svg>`;
 
 /* ============ ĐANG CHỌN XEM MỤC NÀO Ở TỪNG PHẦN ============ */
-let selectedItemKey = { theory:null, exercises:null, solutions:null, quizTheory:null, quizMath:null };
-let expandedGroups = { theory:{}, exercises:{}, solutions:{}, quizTheory:{}, quizMath:{} }; // { [section]: { [folderId]: true/false } }
+let selectedItemKey = { theory:null, exercises:null, solutions:null, quizTheory:null, quizMath:null, quizTf:null, quizShort:null };
+let expandedGroups = { theory:{}, exercises:{}, solutions:{}, quizTheory:{}, quizMath:{}, quizTf:{}, quizShort:{} }; // { [section]: { [folderId]: true/false } }
 const DONE_LABELS = {
   theory:    ['Đã học xong', 'Đánh dấu đã học'],
   exercises: ['Đã làm xong', 'Đánh dấu đã làm'],
   solutions: ['Đã xem', 'Đánh dấu đã xem']
 };
-const ROW_CLASS = { theory:'theory', exercises:'exercise', solutions:'solution', quizTheory:'theory', quizMath:'exercise' };
+const ROW_CLASS = { theory:'theory', exercises:'exercise', solutions:'solution', quizTheory:'theory', quizMath:'exercise', quizTf:'exercise', quizShort:'theory' };
+const PRACTICE_SECTIONS = ['quizTheory','quizMath','quizTf','quizShort']; // các mục luyện tập rút câu từ ngân hàng
 
 function renderTheory(){ renderReaderViewer('theory'); renderReaderList('theory'); }
 function renderExercises(){ renderReaderViewer('exercises'); renderReaderList('exercises'); }
 function renderSolutions(){ renderReaderViewer('solutions'); renderReaderList('solutions'); }
 function renderQuizTheory(){ renderReaderViewer('quizTheory'); renderReaderList('quizTheory'); }
 function renderQuizMath(){ renderReaderViewer('quizMath'); renderReaderList('quizMath'); }
+function renderQuizTf(){ renderReaderViewer('quizTf'); renderReaderList('quizTf'); }
+function renderQuizShort(){ renderReaderViewer('quizShort'); renderReaderList('quizShort'); }
 
 /* Chuyển giữa 3 phần của mục Bài tập */
 let currentExTab = 'exam';
 function switchExTab(tab){
   currentExTab = tab;
   document.querySelectorAll('.ex-subtab').forEach(b => b.classList.toggle('active', b.dataset.extab === tab));
-  ['exam','quizTheory','quizMath'].forEach(t=>{
+  ['exam','quizTheory','quizMath','quizTf','quizShort'].forEach(t=>{
     const p = document.getElementById('exPane-' + t);
     if(p) p.style.display = t === tab ? '' : 'none';
   });
@@ -1340,11 +1573,12 @@ function toggleGroup(section, id){
   if(icon) icon.textContent = newExpanded ? '📂' : '📁';
 }
 
-function buildReaderItemRow(section, list, item){
+function buildReaderItemRow(section, list, item, num){
   const idx = list.indexOf(item);
   const key = itemKey(section, item, idx);
+  const done = isDone(key);
   const row = document.createElement('div');
-  row.className = 'reader-item ' + ROW_CLASS[section] + (selectedItemKey[section] === key ? ' active' : '');
+  row.className = 'reader-item ' + ROW_CLASS[section] + (selectedItemKey[section] === key ? ' active' : '') + (done ? ' is-done' : '');
 
   let metaHtml = '';
   if(section === 'exercises'){
@@ -1352,13 +1586,16 @@ function buildReaderItemRow(section, list, item){
     metaHtml += `<span class="item-diff-inline ${dc}">${escapeHtml(item.difficulty || 'Dễ')}</span>`;
   } else if(section === 'solutions' && item.duration){
     metaHtml += `<span>${escapeHtml(item.duration)}</span>`;
-  } else if(section === 'quizTheory' || section === 'quizMath'){
-    const qi = getQuizInfoFor(item);
+  } else if(PRACTICE_SECTIONS.includes(section)){
+    const qi = getQuizInfoFor(item, section);
     metaHtml += `<span>${qi ? qi.n : 0} câu hỏi</span>`;
   }
-  if(isDone(key)) metaHtml += `<span class="done-dot" title="Đã đánh dấu"></span>`;
+  if(done) metaHtml += `<span class="done-dot" title="Đã đánh dấu"></span>`;
 
-  row.innerHTML = `<h5 title="${escAttr(item.title || '')}">${escapeHtml(item.title) || 'Chưa đặt tiêu đề'}</h5>${metaHtml ? `<div class="meta">${metaHtml}</div>` : ''}`;
+  const badge = done
+    ? `<span class="reader-num" aria-label="Đã xong">✓</span>`
+    : `<span class="reader-num">${num != null ? num : (idx + 1)}</span>`;
+  row.innerHTML = `${badge}<div class="reader-item-body"><h5 title="${escAttr(item.title || '')}">${escapeHtml(item.title) || 'Chưa đặt tiêu đề'}</h5>${metaHtml ? `<div class="meta">${metaHtml}</div>` : ''}</div>`;
   row.onclick = ()=> selectReaderItem(section, key);
   return row;
 }
@@ -1386,6 +1623,7 @@ function renderReaderList(section){
 
   const consumed = new Set();
 
+  let rootNum = 0;
   list.forEach(entry=>{
     if(consumed.has(entry)) return;
 
@@ -1398,12 +1636,15 @@ function renderReaderList(section){
       wrap.dataset.folderId = fid;
 
       const header = document.createElement('div');
-      header.className = 'folder-header';
+      const hasActiveChild = kids.some((k, ki) => itemKey(section, k, list.indexOf(k)) === selectedItemKey[section]);
+      header.className = 'folder-header' + (hasActiveChild ? ' has-active' : '');
       header.innerHTML = `
-        <span class="folder-chevron">${expanded ? '▾' : '▸'}</span>
         <span class="folder-icon">${expanded ? '📂' : '📁'}</span>
-        <span class="folder-name">${escapeHtml(entry.title) || 'Chưa đặt tên'}</span>
-        <span class="folder-count">${kids.length}</span>`;
+        <div class="folder-main">
+          <div class="folder-name">${escapeHtml(entry.title) || 'Chưa đặt tên'}</div>
+          <div class="folder-sub">${kids.length} bài</div>
+        </div>
+        <span class="folder-chevron">${expanded ? '▾' : '▸'}</span>`;
       header.onclick = () => toggleGroup(section, fid);
       wrap.appendChild(header);
 
@@ -1411,7 +1652,7 @@ function renderReaderList(section){
       // thay vì thêm/xoá hẳn khỏi DOM (làm mất hiệu ứng chuyển động).
       const body = document.createElement('div');
       body.className = 'folder-body' + (expanded ? '' : ' collapsed');
-      kids.forEach(k => { body.appendChild(buildReaderItemRow(section, list, k)); consumed.add(k); });
+      kids.forEach((k, ki) => { body.appendChild(buildReaderItemRow(section, list, k, ki + 1)); consumed.add(k); });
       wrap.appendChild(body);
 
       listEl.appendChild(wrap);
@@ -1420,7 +1661,7 @@ function renderReaderList(section){
 
     // bài không thuộc thư mục nào (hoặc thư mục cha không còn tồn tại/không khớp khối) — hiện ở cấp gốc
     if(entry.folderId && folderIds.has(entry.folderId)) return; // đã/sẽ được vẽ lồng trong thư mục ở nhánh trên
-    listEl.appendChild(buildReaderItemRow(section, list, entry));
+    listEl.appendChild(buildReaderItemRow(section, list, entry, ++rootNum));
   });
 }
 
@@ -1433,7 +1674,7 @@ function selectReaderItem(section, key){
 }
 
 function renderReaderViewer(section){
-  if(section === 'quizTheory' || section === 'quizMath'){ renderPracticeViewer(section); return; }
+  if(PRACTICE_SECTIONS.includes(section)){ renderPracticeViewer(section); return; }
   const viewerEl = document.getElementById(section + 'Viewer');
   if(!viewerEl) return;
   const list = itemsInGrade(section);
@@ -1463,7 +1704,7 @@ function renderReaderViewer(section){
   const fileUrl = section === 'solutions' ? item.video : item.file;
   const [doneLabel, todoLabel] = DONE_LABELS[section];
   // Bài lý thuyết có quiz: phải làm quiz đạt mới được tính hoàn thành (không đánh dấu tay được)
-  const quizForItem = section === 'theory' ? getQuizInfoFor(item) : null;
+  const quizForItem = section === 'theory' ? getQuizInfoFor(item, 'theory') : null;
   let pillHtml;
   if(quizForItem && !isDone(key)){
     pillHtml = `<button class="check-pill locked" onclick="openQuizModal()" title="Làm quiz để được tính hoàn thành bài">🔒 Làm quiz để hoàn thành</button>`;
@@ -1939,7 +2180,7 @@ function openProgressModal(){
   let html = '';
   ['10','11','12','dh'].forEach(g=>{
     const meta = g === 'dh' ? SECTION_META.dh : SECTION_META.default;
-    const rows = ['theory','exercises','solutions','quizTheory','quizMath'].map(sec=>{
+    const rows = ['theory','exercises','solutions','quizTheory','quizMath','quizTf','quizShort'].map(sec=>{
       const st = gradeSectionStats(g, sec);
       if(st.total === 0) return '';
       const pct = Math.round((st.done / st.total) * 100);
@@ -2014,12 +2255,14 @@ async function submitChangePassword(){
 /* ============ QUIZ CUỐI BÀI LÝ THUYẾT ============ */
 let quizState = { key: null, answers: {}, submitted: false };
 
-function getQuizFor(item){
+function getQuizFor(item, section){
+  const cq = section ? chapterQuizFor(section, item) : null; // ngân hàng chương được ưu tiên
+  if(cq) return cq;
   const q = item && bankQuizOf(item);
   if(!q || !Array.isArray(q.questions)) return null;
-  const questions = q.questions.filter(x =>
-    x && (x.q || '').trim() && Array.isArray(x.options) && x.options.filter(o => (o || '').trim()).length >= 2
-  );
+  const only = section ? SECTION_QTYPE[section] : null; // mục Đ/S / TLN chỉ nhận đúng dạng
+  const diff = section ? sectionDiff(section) : 'all';
+  const questions = q.questions.filter(x => isValidQuizQ(x) && (!only || (x.type || 'mc') === only) && matchDiff(x, diff));
   if(questions.length === 0) return null;
   const draw = Math.min(Math.max(1, parseInt(q.draw) || questions.length), questions.length);
   const pass = Math.min(Math.max(1, parseInt(q.pass) || 1), draw);
@@ -2027,9 +2270,11 @@ function getQuizFor(item){
 }
 
 /* Thông tin hiển thị (số câu, mức đạt) — có ngay từ metadata, không cần tải ngân hàng */
-function getQuizInfoFor(item){
-  const q = getQuizFor(item);
-  if(q) return { n: q.questions.length, draw: q.draw, pass: q.pass, loaded: true };
+function getQuizInfoFor(item, section){
+  const q = getQuizFor(item, section);
+  if(q) return { n: q.questions.length, draw: q.draw, pass: q.pass, loaded: true, parts: quizPartsText(q) };
+  const ci = section ? chapterQuizInfoFor(section, item) : null; // chương có câu cho bài này (chưa tải ngân hàng)
+  if(ci) return ci;
   const qi = item && item.quizInfo;
   if(qi && qi.n > 0){
     const draw = Math.min(Math.max(1, parseInt(qi.draw) || qi.n), qi.n);
@@ -2038,14 +2283,23 @@ function getQuizInfoFor(item){
   return null;
 }
 
-/* Rút ngẫu nhiên "draw" câu từ ngân hàng — mỗi lượt làm là một bộ câu khác nhau */
+/* Rút ngẫu nhiên câu từ ngân hàng — mỗi lượt là một bộ câu khác nhau.
+   Ngân hàng chương: rút riêng từng phần Trắc nghiệm / Đúng-Sai / Trả lời ngắn rồi xếp theo thứ tự phần. */
 function pickQuizIndices(quiz){
-  const idxs = quiz.questions.map((_, i) => i);
-  for(let i = idxs.length - 1; i > 0; i--){
-    const j = Math.floor(Math.random() * (i + 1));
-    [idxs[i], idxs[j]] = [idxs[j], idxs[i]];
+  const shuffleTake = (idxs, n) => {
+    const a = idxs.slice();
+    for(let i = a.length - 1; i > 0; i--){
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a.slice(0, Math.max(0, n)).sort((x, y) => x - y);
+  };
+  if(quiz.drawMc != null){
+    const mc = [], tf = [], sh = [];
+    quiz.questions.forEach((qq, i) => { (qq.type === 'tf' ? tf : (qq.type === 'short' ? sh : mc)).push(i); });
+    return [...shuffleTake(mc, quiz.drawMc), ...shuffleTake(tf, quiz.drawTf), ...shuffleTake(sh, quiz.drawSh)];
   }
-  return idxs.slice(0, quiz.draw).sort((a, b) => a - b);
+  return shuffleTake(quiz.questions.map((_, i) => i), quiz.draw);
 }
 
 let quizSection = 'theory'; // quiz đang mở thuộc mục nào: theory / quizTheory / quizMath
@@ -2053,14 +2307,14 @@ let quizSection = 'theory'; // quiz đang mở thuộc mục nào: theory / quiz
 function currentTheoryQuiz(){
   const list = itemsInGrade(quizSection);
   const idx = list.findIndex((item, i) => item.type !== 'folder' && itemKey(quizSection, item, i) === selectedItemKey[quizSection]);
-  return idx !== -1 ? getQuizFor(list[idx]) : null;
+  return idx !== -1 ? getQuizFor(list[idx], quizSection) : null;
 }
 
 async function openQuizModal(section){
   quizSection = section || 'theory';
   const list = itemsInGrade(quizSection);
   const idx = list.findIndex((item, i) => item.type !== 'folder' && itemKey(quizSection, item, i) === selectedItemKey[quizSection]);
-  if(idx !== -1) await ensureBankFor(list[idx]);
+  if(idx !== -1) await ensureQuizBanksFor(quizSection, list[idx]); // tải ngân hàng chương + ngân hàng riêng
   const quiz = currentTheoryQuiz();
   if(!quiz) return;
   const key = selectedItemKey[quizSection];
@@ -2083,53 +2337,95 @@ function ensureQuizStateFor(quiz){
   return key;
 }
 
+/* Dựng HTML của MỘT câu hỏi (dùng cho cả kiểu cuộn danh sách lẫn kiểu 1-câu-mỗi-màn) */
+function quizQuestionHtml(qq, qi){
+  const chosen = quizState.answers[qi];
+  let bodyHtml = '';
+  if(qq.type === 'tf'){
+    // Phiếu ĐÚNG/SAI kiểu thi tốt nghiệp: liệt kê các ý, bên dưới là bảng 2 cột Đúng/Sai tô ô tròn
+    const pairs = tfPairs(qq);
+    const stmts = pairs.map(p => `<div class="quiz-tf-stmt-line"><strong>${String.fromCharCode(97 + p.i)})</strong> ${escapeHtml(p.s)}</div>`).join('');
+    const rows = pairs.map(p => {
+      const sel = Array.isArray(chosen) ? chosen[p.i] : undefined;
+      const rowCls = quizState.submitted ? (sel === p.k ? ' class="ok"' : ' class="no"') : '';
+      const cell = v => `<button type="button" class="tf-bubble${sel === v ? ' sel' : ''}${quizState.submitted && p.k === v ? ' key' : ''}" ${quizState.submitted ? 'disabled' : ''} onclick="pickTfAnswer(${qi}, ${p.i}, '${v}')" title="${v === 'Đ' ? 'Đúng' : 'Sai'}"></button>`;
+      return `<tr${rowCls}><td>${String.fromCharCode(97 + p.i)})</td><td>${cell('Đ')}</td><td>${cell('S')}</td></tr>`;
+    }).join('');
+    bodyHtml = stmts + `<table class="tf-sheet"><tr><th></th><th>Đúng</th><th>Sai</th></tr>${rows}</table>`;
+  } else if(qq.type === 'short'){
+    // Phiếu TRẢ LỜI NGẮN kiểu thi tốt nghiệp: 4 ô ký tự (0-9 · dấu "-" chỉ ở ô đầu · dấu ",")
+    const cells = Array.isArray(chosen) ? chosen.slice(0, 4) : String(chosen || '').split('').slice(0, 4);
+    while(cells.length < 4) cells.push('');
+    let cls = '', keyHtml = '';
+    if(quizState.submitted){
+      cls = quizAnswerCorrect(qq, chosen) ? ' correct' : ' wrong';
+      keyHtml = `<div class="quiz-short-key">Đáp án: <strong>${escapeHtml(String(qq.answer))}</strong></div>`;
+    }
+    bodyHtml = `<div class="short-cells${cls}">` + cells.map((c, ci) =>
+      `<input type="text" class="short-cell" maxlength="2" inputmode="decimal" autocomplete="off" value="${escAttr(c)}" ${quizState.submitted ? 'disabled' : ''} oninput="setShortCell(${qi}, ${ci}, this)" onkeydown="shortCellKey(event, this)">`
+    ).join('') + `</div>${quizState.submitted ? '' : '<p class="short-hint">Ghi tối đa 4 ký tự: chữ số 0-9 · dấu trừ "-" ở ô đầu · dấu phẩy ","</p>'}${keyHtml}`;
+  } else {
+    bodyHtml = (qq.options || []).map((op, oi) => {
+      if(!(op || '').trim()) return '';
+      let cls = '';
+      if(quizState.submitted){
+        if(oi === (qq.correct || 0)) cls = ' correct';
+        else if(chosen === oi) cls = ' wrong';
+      } else if(chosen === oi) cls = ' chosen';
+      return `<label class="quiz-opt${cls}">
+        <input type="radio" name="quizq-${qi}" ${chosen === oi ? 'checked' : ''} ${quizState.submitted ? 'disabled' : ''} onchange="pickQuizAnswer(${qi}, ${oi})">
+        <span>${escapeHtml(op)}</span>
+      </label>`;
+    }).join('');
+  }
+  const tag = qq.type === 'tf' ? '<span class="quiz-type-tag">Đúng/Sai</span> ' : (qq.type === 'short' ? '<span class="quiz-type-tag">Trả lời ngắn</span> ' : '');
+  return `<div class="quiz-q" id="quizq-${quizSection}-${qi}">
+    <div class="quiz-q-text">Câu ${qi + 1}. ${tag}${escapeHtml(qq.q)}</div>
+    ${qq.img ? `<img class="quiz-q-img" src="${escAttr(qq.img)}" alt="Hình minh hoạ" loading="lazy">` : ''}
+    ${bodyHtml}
+  </div>`;
+}
+
 /* Dựng nội dung quiz (câu hỏi + nút nộp/kết quả) — dùng chung cho popup và khung luyện tập */
 function quizContentHtml(quiz, key){
   const qList = quizState.picked.map(i => quiz.questions[i]);
   const done = isDone(key);
   let score = 0;
   if(quizState.submitted){
-    qList.forEach((qq, qi) => { if(quizState.answers[qi] === (qq.correct || 0)) score++; });
+    qList.forEach((qq, qi) => { if(quizAnswerCorrect(qq, quizState.answers[qi])) score++; });
   }
 
-  const qsHtml = qList.map((qq, qi) => {
-    const chosen = quizState.answers[qi];
-    return `<div class="quiz-q" id="quizq-${quizSection}-${qi}">
-      <div class="quiz-q-text">Câu ${qi + 1}. ${escapeHtml(qq.q)}</div>
-      ${qq.img ? `<img class="quiz-q-img" src="${escAttr(qq.img)}" alt="Hình minh hoạ" loading="lazy">` : ''}
-      ${qq.options.map((op, oi) => {
-        if(!(op || '').trim()) return '';
-        let cls = '';
-        if(quizState.submitted){
-          if(oi === (qq.correct || 0)) cls = ' correct';
-          else if(chosen === oi) cls = ' wrong';
-        } else if(chosen === oi) cls = ' chosen';
-        return `<label class="quiz-opt${cls}">
-          <input type="radio" name="quizq-${qi}" ${chosen === oi ? 'checked' : ''} ${quizState.submitted ? 'disabled' : ''} onchange="pickQuizAnswer(${qi}, ${oi})">
-          <span>${escapeHtml(op)}</span>
-        </label>`;
-      }).join('')}
-    </div>`;
-  }).join('');
+  const qsHtml = qList.map((qq, qi) => quizQuestionHtml(qq, qi)).join('');
 
   let footHtml;
   if(quizState.submitted){
-    const passed = score >= quiz.pass;
+    const wrong = qList.length - score;
+    let resultHtml;
+    if(quizSection === 'theory'){
+      // Quiz cuối bài: giữ điều kiện đạt để tính hoàn thành
+      const passed = score >= quiz.pass;
+      resultHtml = `<div class="quiz-result ${passed ? 'pass' : 'fail'}">${passed
+        ? `🎉 Đạt! Bạn đúng ${score}/${qList.length} câu — bài học được tính là hoàn thành.`
+        : `Chưa đạt — đúng ${score}/${qList.length} câu, còn thiếu <strong>${quiz.pass - score}</strong> câu đúng nữa để qua. Thử lại nhé!`}</div>`;
+    } else {
+      // Các mục luyện tập: chỉ báo số câu đúng, không có "chưa đạt cần x câu để qua"
+      const allRight = wrong === 0;
+      resultHtml = `<div class="quiz-result ${allRight ? 'pass' : 'fail'}">Bạn đúng <strong>${score}/${qList.length}</strong> câu.${allRight ? ' Tuyệt vời!' : ''}</div>`;
+    }
     footHtml = `
-      <div class="quiz-result ${passed ? 'pass' : 'fail'}">
-        ${passed
-          ? `🎉 Đạt! Bạn đúng ${score}/${qList.length} câu — bài học được tính là hoàn thành.`
-          : `Chưa đạt — đúng ${score}/${qList.length} câu, còn thiếu <strong>${quiz.pass - score}</strong> câu đúng nữa để qua. Thử lại nhé!`}
-      </div>
-      ${passed ? '' : `<button class="quiz-submit-btn" onclick="retryQuiz()">Làm lại</button>`}`;
+      ${resultHtml}
+      <div class="quiz-retry-row">
+        <button class="quiz-submit-btn" onclick="retrySameQuiz()">Làm lại toàn bộ ${qList.length} câu vừa rồi</button>
+        <button class="quiz-submit-btn quiz-btn-alt" onclick="retryQuiz()">Bộ câu ngẫu nhiên mới</button>
+      </div>`;
   } else {
     const answered = Object.keys(quizState.answers).length;
     footHtml = `<button class="quiz-submit-btn" onclick="confirmSubmitQuiz()">Nộp bài</button>`;
   }
 
   const navHtml = `<div class="quiz-nav">` + qList.map((qq, qi)=>{
-    let cls = quizState.answers[qi] !== undefined ? ' done' : '';
-    if(quizState.submitted) cls = quizState.answers[qi] === (qq.correct || 0) ? ' ok' : ' no';
+    let cls = quizAnswerDone(qq, quizState.answers[qi]) ? ' done' : '';
+    if(quizState.submitted) cls = quizAnswerCorrect(qq, quizState.answers[qi]) ? ' ok' : ' no';
     if(quizState.current === qi) cls += ' cur'; // ô vừa bấm -> viền màu nổi bật
     return `<button class="quiz-nav-dot${cls}" onclick="scrollToQuizQ(${qi})" title="Câu ${qi + 1}${cls === ' done' ? ' — đã chọn' : (cls === '' ? ' — chưa làm' : '')}">${qi + 1}</button>`;
   }).join('') + `</div>`;
@@ -2178,6 +2474,15 @@ function renderQuizPanel(){
 }
 
 /* Vẽ lại đúng bề mặt đang hiển thị quiz: khung luyện tập hoặc popup */
+/* Khu luyện tập hiện 1 câu mỗi màn -> chuyển tới câu thứ i */
+function goToQuizPage(i){
+  const n = (quizState.picked || []).length;
+  quizState.page = Math.max(0, Math.min(i, n - 1));
+  quizState.current = quizState.page;
+  renderActiveQuiz();
+  const scrollEl = document.querySelector('.practice-quiz-scroll');
+  if(scrollEl) scrollEl.scrollTop = 0; // sang câu mới thì xem từ đầu câu
+}
 function renderActiveQuiz(){
   if(quizSection !== 'theory' && practiceActive[quizSection]){
     renderPracticeViewer(quizSection);
@@ -2202,15 +2507,57 @@ function pickQuizAnswer(qi, oi){
   quizState.answers[qi] = oi;
   renderActiveQuiz();
 }
+function pickTfAnswer(qi, si, v){
+  const cur = quizState.answers[qi];
+  const arr = Array.isArray(cur) ? cur : [];
+  arr[si] = arr[si] === v ? undefined : v; // bấm lại để bỏ chọn
+  quizState.answers[qi] = arr;
+  renderActiveQuiz();
+}
+function setShortCell(qi, ci, el){
+  let v = String(el.value || '').replace(/\./g, ',').replace(/−/g, '-').replace(/[^0-9,\-]/g, '');
+  if(ci !== 0) v = v.replace(/-/g, ''); // dấu trừ chỉ được ghi ở ô đầu tiên (như phiếu thi)
+  v = v.slice(-1); // mỗi ô 1 ký tự — gõ đè thì lấy ký tự mới nhất
+  el.value = v;
+  const cur = quizState.answers[qi];
+  const arr = Array.isArray(cur) ? cur : ['', '', '', ''];
+  arr[ci] = v;
+  quizState.answers[qi] = arr;
+  if(v && el.nextElementSibling && el.nextElementSibling.classList.contains('short-cell')) el.nextElementSibling.focus(); // tự nhảy sang ô kế
+  refreshQuizDot(qi);
+}
+function shortCellKey(e, el){
+  if(e.key === 'Backspace' && !el.value && el.previousElementSibling && el.previousElementSibling.classList.contains('short-cell')){
+    el.previousElementSibling.focus(); // lùi về ô trước
+  }
+}
+/* Cập nhật riêng 1 ô trên bảng số điều hướng — không vẽ lại cả khung để không mất con trỏ đang nhập */
+function refreshQuizDot(qi){
+  if(quizState.submitted) return;
+  const quiz = currentTheoryQuiz(); if(!quiz) return;
+  const qq = quiz.questions[(quizState.picked || [])[qi]]; if(!qq) return;
+  const done = quizAnswerDone(qq, quizState.answers[qi]);
+  document.querySelectorAll('.quiz-nav').forEach(nav => {
+    const d = nav.querySelectorAll('.quiz-nav-dot')[qi];
+    if(d) d.classList.toggle('done', done);
+  });
+}
 function retryQuiz(){
   const quiz = currentTheoryQuiz();
   quizState = { key: quizState.key, answers: {}, submitted: false, picked: quiz ? pickQuizIndices(quiz) : [] }; // làm lại = bộ câu ngẫu nhiên mới
   renderActiveQuiz();
 }
+function retrySameQuiz(){
+  // Làm lại ĐÚNG các câu vừa random (giữ nguyên thứ tự picked) — chỉ xoá đáp án đã chọn
+  quizState = { key: quizState.key, answers: {}, submitted: false, picked: (quizState.picked || []).slice() };
+  renderActiveQuiz();
+}
 function confirmSubmitQuiz(){
-  const total = (quizState.picked || []).length;
-  const answered = Object.keys(quizState.answers).length;
-  if(answered < total && !confirm(`Còn ${total - answered} câu chưa chọn đáp án — câu bỏ trống sẽ tính là sai. Nộp bài luôn?`)) return;
+  const quiz = currentTheoryQuiz();
+  const qList = quiz ? (quizState.picked || []).map(i => quiz.questions[i]).filter(Boolean) : [];
+  const total = qList.length;
+  const answered = qList.filter((qq, qi) => quizAnswerDone(qq, quizState.answers[qi])).length;
+  if(answered < total && !confirm(`Còn ${total - answered} câu chưa trả lời đủ — câu bỏ trống/thiếu ý sẽ tính là sai. Nộp bài luôn?`)) return;
   submitQuiz();
 }
 
@@ -2220,7 +2567,7 @@ function submitQuiz(){
   if(quiz){
     let score = 0;
     const qList = (quizState.picked || []).map(i => quiz.questions[i]).filter(Boolean);
-    qList.forEach((qq, qi) => { if(quizState.answers[qi] === (qq.correct || 0)) score++; });
+    qList.forEach((qq, qi) => { if(quizAnswerCorrect(qq, quizState.answers[qi])) score++; });
     logHistory({
       type: 'quiz', itemId: quizState.key,
       title: itemTitleByKey(quizSection, quizState.key), where: sectionLabelNow(quizSection),
@@ -2237,15 +2584,23 @@ function submitQuiz(){
 }
 
 /* ============ VIEWER CHỦ ĐỀ TRẮC NGHIỆM (ĐỊNH TÍNH / ĐỊNH LƯỢNG) ============ */
-let practiceActive = { quizTheory: false, quizMath: false }; // đang làm bài ngay trong khung?
+let practiceActive = { quizTheory: false, quizMath: false, quizTf: false, quizShort: false }; // đang làm bài ngay trong khung?
+const quizBanksLoaded = new Set(); // các bài đã tải ngân hàng cho màn giới thiệu (tránh tải lặp)
 
 async function startPractice(section){
   quizSection = section;
   const list = itemsInGrade(section);
   const idx = list.findIndex((item, i) => item.type !== 'folder' && itemKey(section, item, i) === selectedItemKey[section]);
-  if(idx !== -1) await ensureBankFor(list[idx]); // tải ngân hàng câu hỏi đúng lúc bắt đầu
+  if(idx !== -1) await ensureQuizBanksFor(section, list[idx]); // tải ngân hàng chương + ngân hàng riêng đúng lúc bắt đầu
   const quiz = currentTheoryQuiz();
-  if(!quiz) return;
+  if(!quiz){
+    // Đã tải ngân hàng nhưng không có câu hỏi đúng dạng & hợp lệ để luyện -> báo rõ, tránh nút "chết"
+    practiceActive[section] = false;
+    renderPracticeViewer(section);
+    const kind = ({ tf: 'Đúng/Sai', short: 'Trả lời ngắn' })[SECTION_QTYPE[section]] || 'trắc nghiệm';
+    alert(`Chủ đề này chưa có câu ${kind} nào đủ nội dung + đáp án để luyện.\nMở editor kiểm tra: câu hỏi phải có nội dung và đã chọn/điền đáp án đúng.`);
+    return;
+  }
   const key = selectedItemKey[section];
   quizState = { key, answers: {}, submitted: false, picked: pickQuizIndices(quiz) };
   practiceActive[section] = true;
@@ -2280,18 +2635,51 @@ function renderPracticeViewer(section){
   }
   const item = list[idx];
   const key = selectedItemKey[section];
-  const quiz = getQuizFor(item);        // ngân hàng thật (nếu đã tải)
-  const qInfo = getQuizInfoFor(item);   // thông tin hiển thị (luôn có)
+  const quiz = getQuizFor(item, section);        // ngân hàng thật (nếu đã tải) — ưu tiên ngân hàng chương
+  const qInfo = getQuizInfoFor(item, section);   // thông tin hiển thị (luôn có)
   const done = isDone(key);
 
-  // Đang trong lượt luyện tập -> đề hiện ngay trong khung này, không mở popup
+  // Đang trong lượt luyện tập -> hiện đề trong khung này
   if(practiceActive[section] && quiz && quizState.key === key){
     quizSection = section;
     ensureQuizStateFor(quiz);
-    const c = quizContentHtml(quiz, key);
+    // Đúng/Sai & Trả lời ngắn (câu dài) -> 1 câu mỗi màn; Trắc nghiệm (câu ngắn) -> cuộn cả danh sách
+    const paged = SECTION_QTYPE[section] === 'tf' || SECTION_QTYPE[section] === 'short';
+    let scrollHtml, footInner;
+
+    if(paged){
+      const qList = quizState.picked.map(i => quiz.questions[i]);
+      const nQ = qList.length;
+      if(quizState.page == null || quizState.page < 0) quizState.page = 0;
+      if(quizState.page > nQ - 1) quizState.page = nQ - 1;
+      const page = quizState.page;
+      const oneHtml = quizQuestionHtml(qList[page], page);
+      const navHtml = `<div class="quiz-nav">` + qList.map((qq, qi)=>{
+        let cls = quizAnswerDone(qq, quizState.answers[qi]) ? ' done' : '';
+        if(quizState.submitted) cls = quizAnswerCorrect(qq, quizState.answers[qi]) ? ' ok' : ' no';
+        if(qi === page) cls += ' cur';
+        return `<button class="quiz-nav-dot${cls}" onclick="goToQuizPage(${qi})" title="Câu ${qi + 1}">${qi + 1}</button>`;
+      }).join('') + `</div>`;
+      const isLast = page === nQ - 1;
+      const pagerNav = `<div class="quiz-pager">
+          <button class="quiz-pager-btn" ${page === 0 ? 'disabled' : ''} onclick="goToQuizPage(${page - 1})">← Câu trước</button>
+          <span class="quiz-pager-pos">Câu ${page + 1}/${nQ}</span>
+          <button class="quiz-pager-btn" ${isLast ? 'disabled' : ''} onclick="goToQuizPage(${page + 1})">Câu sau →</button>
+        </div>${quizState.submitted ? '' : `<button class="quiz-submit-btn" style="margin-top:8px;" onclick="confirmSubmitQuiz()">Nộp bài</button>`}`;
+      const resultHtml = quizState.submitted ? quizContentHtml(quiz, key).footHtml : '';
+      scrollHtml = `${oneHtml}${resultHtml}`;
+      footInner = `${navHtml}${pagerNav}`;
+    } else {
+      // Trắc nghiệm: cuộn toàn bộ câu như cũ (ô số ở dưới nhảy nhanh, bấm cuộn tới câu)
+      const oldScrollEl = viewerEl.querySelector('.practice-quiz-scroll');
+      const keepScroll = oldScrollEl ? oldScrollEl.scrollTop : 0;
+      const c = quizContentHtml(quiz, key);
+      scrollHtml = c.qsHtml;
+      footInner = `${c.navHtml}${c.footHtml}`;
+      viewerEl._keepScroll = keepScroll;
+    }
+
     viewerEl.classList.add('practice-mode');
-    const oldScrollEl = viewerEl.querySelector('.practice-quiz-scroll');
-    const keepScroll = oldScrollEl ? oldScrollEl.scrollTop : 0;
     viewerEl.innerHTML = `
       <div class="reader-viewer-head">
         <h4 title="${escAttr(item.title || '')}">${escapeHtml(item.title) || 'Chưa đặt tiêu đề'}</h4>
@@ -2301,12 +2689,14 @@ function renderPracticeViewer(section){
       </div>
       <div class="reader-viewer-body">
         <div class="practice-quiz-flex">
-          <div class="practice-quiz-scroll">${c.qsHtml}</div>
-          <div class="practice-quiz-foot">${c.navHtml}${c.footHtml}</div>
+          <div class="practice-quiz-scroll">${scrollHtml}</div>
+          <div class="practice-quiz-foot">${footInner}</div>
         </div>
       </div>`;
-    const newScrollEl = viewerEl.querySelector('.practice-quiz-scroll');
-    if(newScrollEl) newScrollEl.scrollTop = keepScroll; // vẽ lại nhưng đứng yên tại chỗ
+    if(!paged){
+      const newScrollEl = viewerEl.querySelector('.practice-quiz-scroll');
+      if(newScrollEl && viewerEl._keepScroll) newScrollEl.scrollTop = viewerEl._keepScroll; // giữ nguyên vị trí cuộn khi vẽ lại
+    }
     renderCommentsPanel(section);
     return;
   }
@@ -2320,15 +2710,34 @@ function renderPracticeViewer(section){
     if(qInfo) pillHtml += `<button class="check-pill" onclick="startPractice('${section}')" title="Luyện lại bộ câu ngẫu nhiên mới">📝 Làm lại</button>`;
   }
 
-  const body = qInfo ? `
-    <div class="exam-intro">
-      <div class="exam-intro-icon">${section === 'quizTheory' ? '📖' : '🧮'}</div>
-      <h3>${escapeHtml(item.title) || 'Chưa đặt tiêu đề'}</h3>
-      <p>Ngân hàng <strong>${qInfo.n}</strong> câu · mỗi lượt rút ngẫu nhiên <strong>${qInfo.draw}</strong> câu · đúng ≥ <strong>${qInfo.pass}</strong> câu để đạt</p>
-      ${item.note ? `<p class="exam-note">${escapeHtml(item.note)}</p>` : ''}
-      <button class="exam-enter-btn" onclick="startPractice('${section}')">🎯 Bắt đầu luyện tập</button>
-    </div>`
-    : `<div class="reader-empty"><div>Chủ đề này chưa có câu hỏi.</div></div>`;
+  // Tải ngân hàng để đếm số câu theo mức độ; nếu metadata báo có câu mà chưa tải thì tải rồi vẽ lại (1 lần)
+  const counts = quizLevelCounts(section, item);
+  if(counts.all === 0 && qInfo && !quizBanksLoaded.has(key)){
+    quizBanksLoaded.add(key);
+    ensureQuizBanksFor(section, item).then(()=> renderPracticeViewer(section));
+  }
+  let body;
+  if(counts.all === 0){
+    body = qInfo
+      ? `<div class="exam-intro"><h3>${escapeHtml(item.title) || 'Chưa đặt tiêu đề'}</h3><p>Đang tải ngân hàng câu hỏi…</p></div>`
+      : `<div class="reader-empty"><div>Chủ đề này chưa có câu hỏi.</div></div>`;
+  } else {
+    const diff = practiceLevel[section] || 'all';
+    const selCount = diff === 'all' ? counts.all : counts[diff];
+    const diffBtns = [['all','Tất cả',counts.all],['easy','Dễ',counts.easy],['medium','Trung bình',counts.medium],['hard','Khó',counts.hard]]
+      .map(([v,label,n]) => `<button class="diff-btn${diff===v?' on':''}${n===0?' empty':''}" ${n===0?'disabled':''} onclick="setPracticeLevel('${section}','${v}')">${label}<b>${n}</b></button>`).join('');
+    const qf = getQuizFor(item, section); // đã lọc theo mức đang chọn
+    const drawTxt = qf ? `mỗi lượt rút ngẫu nhiên <strong>${qf.draw}</strong> câu${quizPartsText(qf) ? ` (${quizPartsText(qf)})` : ''}` : 'chọn mức có câu để bắt đầu';
+    body = `
+      <div class="exam-intro">
+        <h3>${escapeHtml(item.title) || 'Chưa đặt tiêu đề'}</h3>
+        <div class="diff-label">Chọn mức độ</div>
+        <div class="diff-row">${diffBtns}</div>
+        <p>Đang chọn <strong>${selCount}</strong> câu · ${drawTxt}</p>
+        ${item.note ? `<p class="exam-note">${escapeHtml(item.note)}</p>` : ''}
+        <button class="exam-enter-btn" ${selCount === 0 ? 'disabled' : ''} onclick="startPractice('${section}')">🎯 Bắt đầu luyện tập</button>
+      </div>`;
+  }
 
   viewerEl.innerHTML = `
     <div class="reader-viewer-head">
@@ -2637,7 +3046,10 @@ function exitExam(){
   const s = examState;
   if(s && !s.submitted){
     const answered = s.answers.mc.some(Boolean) || s.answers.tf.some(g => g.some(Boolean)) || s.answers.short.some(x => x && x.trim());
-    if(answered && !confirm('Bạn đang làm dở — thoát bây giờ sẽ MẤT toàn bộ bài làm. Vẫn thoát?')) return;
+    const msg = answered
+      ? 'Bạn đang làm dở — thoát bây giờ sẽ MẤT toàn bộ bài làm và không được tính điểm. Vẫn thoát?'
+      : 'Thoát phòng thi? Đồng hồ sẽ dừng và bài thi này coi như chưa làm.';
+    if(!confirm(msg)) return;
   }
   if(s && s.timerId) clearInterval(s.timerId);
   examState = null;
@@ -2672,7 +3084,7 @@ function initStudentAuth(){
   firebase.auth().onAuthStateChanged(async (user)=>{
     currentUser = user || null;
     updateAccountBar();
-    ['theory','exercises','solutions','quizTheory','quizMath'].forEach(hideCommentsPanel); // vẽ lại khung thảo luận theo trạng thái đăng nhập
+    ['theory','exercises','solutions','quizTheory','quizMath','quizTf','quizShort'].forEach(hideCommentsPanel); // vẽ lại khung thảo luận theo trạng thái đăng nhập
     if(user){
       closeAuthModal();
       await loadCloudProgress(user);
@@ -2873,6 +3285,8 @@ function doStudentLogout(){
   closeQuizModal();
   practiceActive.quizTheory = false;
   practiceActive.quizMath = false;
+  practiceActive.quizTf = false;
+  practiceActive.quizShort = false;
   goHome();
 }
 
@@ -2894,20 +3308,39 @@ if(!isConfigured()){
   initStudentAuth();
   restoreNavState(); // về đúng thẻ/bài ngay lập tức — dữ liệu sẽ tự đổ vào sau
 
-  docRef.onSnapshot((snap)=>{
-    const parsed = snap.exists ? snap.data() : {};
+  /* ĐỌC NỘI DUNG TIẾT KIỆM QUOTA: hiện ngay từ cache (0 lượt đọc) rồi tải mới đúng 1 lần.
+     Trước đây dùng onSnapshot (real-time) khiến mỗi lần admin sửa là MỌI máy đang mở đều đọc lại
+     -> tốn quota rất nhanh. Giờ mỗi lần mở trang chỉ tốn 1 lượt đọc. */
+  const CONTENT_CACHE_KEY = 'trongtam_content_v1';
+  function applyContentData(parsed){
     data = {
       theory: parsed.theory || [],
       exercises: parsed.exercises || [],
       solutions: parsed.solutions || [],
       quizTheory: parsed.quizTheory || [],
-      quizMath: parsed.quizMath || []
+      quizMath: parsed.quizMath || [],
+      quizTf: parsed.quizTf || [],
+      quizShort: parsed.quizShort || []
     };
     renderAll();
-  }, (err)=>{
-    console.error('Lỗi kết nối Firestore:', err);
-    showSetupNotice('Không tải được dữ liệu', 'Kiểm tra lại Firestore Rules (phải cho phép "allow read: if true;") và đúng firebaseConfig.');
-    document.getElementById('app').style.display = 'none';
+  }
+  // 1) Hiện ngay nội dung đã lưu lần trước (không tốn lượt đọc nào)
+  let hadCache = false;
+  try{
+    const cached = JSON.parse(localStorage.getItem(CONTENT_CACHE_KEY) || 'null');
+    if(cached){ hadCache = true; applyContentData(cached); }
+  }catch(e){}
+  // 2) Tải bản mới nhất đúng 1 lần rồi cập nhật cache
+  docRef.get().then((snap)=>{
+    const parsed = snap.exists ? snap.data() : {};
+    try{ localStorage.setItem(CONTENT_CACHE_KEY, JSON.stringify(parsed)); }catch(e){}
+    applyContentData(parsed);
+  }).catch((err)=>{
+    console.error('Lỗi tải nội dung Firestore:', err);
+    if(!hadCache){ // chưa có cache mà tải lỗi -> mới cần báo
+      showSetupNotice('Không tải được dữ liệu', 'Kiểm tra lại Firestore Rules (phải cho phép "allow read: if true;") và đúng firebaseConfig.');
+      document.getElementById('app').style.display = 'none';
+    }
   });
 }
 </script>
