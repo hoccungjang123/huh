@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://hoccungjang123.github.io/huh/sitemap.xml
+Sitemap: https://hocthanhthukhoa123.github.io/huh/sitemap.xml
