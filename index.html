@@ -331,6 +331,7 @@
   .quiz-q{margin-bottom:16px;}
   .quiz-q-text{font-size:14px;font-weight:700;margin-bottom:8px;line-height:1.5;}
   .quiz-q-img{max-width:100%;max-height:300px;border-radius:10px;border:1px solid var(--paper-line);margin:2px 0 10px;display:block;background:#fff;}
+  .quiz-q-imgnote{font-size:11px;color:var(--ink-faint);margin:-6px 0 10px;font-style:italic;}
   .quiz-opt{
     display:flex;align-items:flex-start;gap:9px;padding:9px 12px;border:1.5px solid var(--paper-line);
     border-radius:9px;margin-bottom:6px;cursor:pointer;font-size:13.5px;line-height:1.5;transition:.12s;
@@ -2381,7 +2382,7 @@ function quizQuestionHtml(qq, qi){
   const tag = qq.type === 'tf' ? '<span class="quiz-type-tag">Đúng/Sai</span> ' : (qq.type === 'short' ? '<span class="quiz-type-tag">Trả lời ngắn</span> ' : '');
   return `<div class="quiz-q" id="quizq-${quizSection}-${qi}">
     <div class="quiz-q-text">Câu ${qi + 1}. ${tag}${escapeHtml(qq.q)}</div>
-    ${qq.img ? `<img class="quiz-q-img" src="${escAttr(qq.img)}" alt="Hình minh hoạ" loading="lazy">` : ''}
+    ${qq.img ? `<img class="quiz-q-img" src="${escAttr(qq.img)}" alt="Hình minh hoạ" loading="lazy" onerror="this.onerror=null;this.style.display='none'">${qq.imgAuto ? `<div class="quiz-q-imgnote">✏️ Hình do AI tự vẽ minh hoạ — có thể chưa chính xác</div>` : ''}` : ''}
     ${bodyHtml}
   </div>`;
 }
