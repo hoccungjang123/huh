@@ -1593,7 +1593,6 @@ function buildReaderItemRow(section, list, item, num){
     metaHtml += `<span>${escapeHtml(item.duration)}</span>`;
   } else if(PRACTICE_SECTIONS.includes(section)){
     const qi = getQuizInfoFor(item, section);
-    metaHtml += `<span>${qi ? qi.n : 0} câu hỏi</span>`;
   }
   if(done) metaHtml += `<span class="done-dot" title="Đã đánh dấu"></span>`;
 
@@ -2417,8 +2416,11 @@ function quizContentHtml(quiz, key){
       const allRight = wrong === 0;
       resultHtml = `<div class="quiz-result ${allRight ? 'pass' : 'fail'}">Bạn đúng <strong>${score}/${qList.length}</strong> câu.${allRight ? ' Tuyệt vời!' : ''}</div>`;
     }
-    footHtml = `
-      ${resultHtml}
+    // Quiz cuối bài: KHÔNG cho làm lại đúng bộ câu cũ (đã lộ đáp án) — chỉ rút bộ mới để tránh học vẹt qua bài
+    footHtml = quizSection === 'theory'
+      ? `${resultHtml}
+      <button class="quiz-submit-btn" onclick="retryQuiz()">Làm lại (bộ câu ngẫu nhiên mới)</button>`
+      : `${resultHtml}
       <div class="quiz-retry-row">
         <button class="quiz-submit-btn" onclick="retrySameQuiz()">Làm lại toàn bộ ${qList.length} câu vừa rồi</button>
         <button class="quiz-submit-btn quiz-btn-alt" onclick="retryQuiz()">Bộ câu ngẫu nhiên mới</button>
@@ -2738,7 +2740,6 @@ function renderPracticeViewer(section){
         <h3>${escapeHtml(item.title) || 'Chưa đặt tiêu đề'}</h3>
         <div class="diff-label">Chọn mức độ</div>
         <div class="diff-row">${diffBtns}</div>
-        <p>Đang chọn <strong>${selCount}</strong> câu · ${drawTxt}</p>
         ${item.note ? `<p class="exam-note">${escapeHtml(item.note)}</p>` : ''}
         <button class="exam-enter-btn" ${selCount === 0 ? 'disabled' : ''} onclick="startPractice('${section}')">🎯 Bắt đầu luyện tập</button>
       </div>`;
