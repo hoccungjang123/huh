@@ -2674,8 +2674,8 @@ function renderPracticeViewer(section){
           <button class="quiz-pager-btn" ${isLast ? 'disabled' : ''} onclick="goToQuizPage(${page + 1})">Câu sau →</button>
         </div>${quizState.submitted ? '' : `<button class="quiz-submit-btn" style="margin-top:8px;" onclick="confirmSubmitQuiz()">Nộp bài</button>`}`;
       const resultHtml = quizState.submitted ? quizContentHtml(quiz, key).footHtml : '';
-      scrollHtml = `${oneHtml}${resultHtml}`;
-      footInner = `${navHtml}${pagerNav}`;
+      scrollHtml = `${oneHtml}`;
+      footInner = `${navHtml}${pagerNav}${resultHtml}`;
     } else {
       // Trắc nghiệm: cuộn toàn bộ câu như cũ (ô số ở dưới nhảy nhanh, bấm cuộn tới câu)
       const oldScrollEl = viewerEl.querySelector('.practice-quiz-scroll');
@@ -2732,7 +2732,7 @@ function renderPracticeViewer(section){
     const diff = practiceLevel[section] || 'all';
     const selCount = diff === 'all' ? counts.all : counts[diff];
     const diffBtns = [['all','Tất cả',counts.all],['easy','Dễ',counts.easy],['medium','Trung bình',counts.medium],['hard','Khó',counts.hard]]
-      .map(([v,label,n]) => `<button class="diff-btn${diff===v?' on':''}${n===0?' empty':''}" ${n===0?'disabled':''} onclick="setPracticeLevel('${section}','${v}')">${label}<b>${n}</b></button>`).join('');
+      .map(([v,label,n]) => `<button class="diff-btn${diff===v?' on':''}${n===0?' empty':''}" ${n===0?'disabled':''} onclick="setPracticeLevel('${section}','${v}')">${label}</button>`).join('');
     const qf = getQuizFor(item, section); // đã lọc theo mức đang chọn
     const drawTxt = qf ? `mỗi lượt rút ngẫu nhiên <strong>${qf.draw}</strong> câu${quizPartsText(qf) ? ` (${quizPartsText(qf)})` : ''}` : 'chọn mức có câu để bắt đầu';
     body = `
